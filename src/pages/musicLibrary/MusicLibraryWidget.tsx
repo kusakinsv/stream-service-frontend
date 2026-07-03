@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Box, Stack } from "@mui/material";
 
 import type { AudioTrackData } from "@/app/types.ts";
@@ -18,9 +19,9 @@ export const MusicLibraryWidget = () => {
     const { isPlaying, currentTrack, setCurrentTrack, togglePlay} = useAudioStore();
 
     const { isLoading: isValidationLoading, validatedItems } = useValidateAudioTracks(data?.positions ?? [], {
-        concurrency: 5,
-        itemTimeout: 5000,
-        globalTimeout: 12000,
+        concurrency: 2,
+        itemTimeout: 10000,
+        globalTimeout: 20000,
     });
 
     const onItemPlayButtonClickHandler = (item: AudioTrackData, trackList: AudioTrackData[]) => {
@@ -35,17 +36,19 @@ export const MusicLibraryWidget = () => {
       deleteItem(mapToPlayListItem(item));
     }
 
-    const playList = validatedItems
+    const playList = useMemo(() => validatedItems
       .sort((o1, o2) => (o1.position ?? Infinity) - (o2.position ?? Infinity))
-      .map(item =>
-      <PlayListTrackItem
-        item={item}
-        isPlaying={isPlaying}
-        currentTrackUrl={currentTrack?.url}
-        key={item.url}
-        onClick={() => onItemPlayButtonClickHandler(item, validatedItems)}
-        onDeleteClick={() => handleDelete(item)}
-      />)
+      .map(item => {
+        // console.log(item.url);
+        return <PlayListTrackItem
+          item={item}
+          isPlaying={isPlaying}
+          currentTrackUrl={currentTrack?.url}
+          key={item.url}
+          onClick={() => onItemPlayButtonClickHandler(item, validatedItems)}
+          onDeleteClick={() => handleDelete(item)}
+        />;
+      }),[validatedItems, isPlaying, deleteItem, currentTrack, setCurrentTrack, togglePlay]);
 
     return(
       <Stack sx={{

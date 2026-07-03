@@ -1,6 +1,6 @@
-import type { AudioItem, PlayListItem, AudioTrackData } from "@/app/types.ts";
+import type { PlayListItem, AudioTrackData } from "@/app/types.ts";
 
-export const removeDuplicates = <T extends AudioItem>(values: T[]) => {
+export const removeDuplicates = <T extends {url: string} >(values: T[]) => {
   const map = new Map<string, T>();
   for (const item of values) {
     if (!map.has(item.url)) {

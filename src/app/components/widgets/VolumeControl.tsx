@@ -51,7 +51,7 @@ export const VolumeControl = () => {
                     left: 0,
                     height: 3,
                     padding: "0.7rem 0",
-                    width: "17rem",
+                    width: "10rem",
                     // paddingBottom: "1px",
                     // "& .MuiSlider-track": { display: "none" },
                     // "& .MuiSlider-rail": { display: "none" },

@@ -14,7 +14,7 @@ import { MusicPlayerControlsWidget } from "@/app/components/widgets/MusicPlayerC
 
 
 export const SearchMusicWidget = () => {
-  // const { currentSearchTrack} = useSearchStore();
+
   const { data, isPending, mutate } = useSearchMusicTracks();
 
   const { mutate: addTrackToLibrary } = useAddTrackToLibrary();
@@ -58,15 +58,18 @@ export const SearchMusicWidget = () => {
   );
 
   const trackList = useMemo(() => trackListFiltered
-      .map((item) => (
-        <TrackItem
-          item={item}
-          isPlaying={isPlaying}
-          currentTrackUrl={currentTrack?.url}
-          key={item.url}
-          onPlayClick={() => onItemPlayButtonClickHandler(item, trackListFiltered)}
-          onAddClick={() => handleAddTrackToLibrary(item)}
-        />)),
+      .map((item) => {
+        // console.log(item.url);
+        return (
+          <TrackItem
+            item={item}
+            isPlaying={isPlaying}
+            currentTrackUrl={currentTrack?.url}
+            key={item.url}
+            onPlayClick={() => onItemPlayButtonClickHandler(item, trackListFiltered)}
+            onAddClick={() => handleAddTrackToLibrary(item)}
+          />);
+      }),
     [currentTrack?.url, isPlaying, onItemPlayButtonClickHandler, trackListFiltered],
   );
 

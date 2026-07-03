@@ -27,16 +27,33 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
   globalTimeout = 7000,
 }: UseFilterValidAudiosOptions): UseFilterValidAudiosResult<AudioTrackData> => {
   const [validated, setValidated] = useState<AudioTrackData[]>([]);
-  const duplicatesRemoved = useMemo(() => removeDuplicates(validated), [validated]);
+  // const duplicatesRemoved = useMemo(() => removeDuplicates(validated), [validated]);
 
   const [isLoading, setIsLoading] = useState(true);
 
   const activeRequestsRef = useRef(0);
+  const abortControllersRef = useRef<Set<AbortController>>(new Set());
+
+
   const currentIndexRef = useRef(0);
   const isMountedRef = useRef(true);
   const globalTimeoutRef = useRef<number | undefined>();
   const itemTimeoutsRef = useRef<Set<number>>(new Set());
-  const abortControllersRef = useRef<Set<AbortController>>(new Set());
+
+  //функиця очистки
+  const cleanup = () => {
+    if (globalTimeoutRef.current) {
+      clearTimeout(globalTimeoutRef.current);
+      globalTimeoutRef.current = undefined;
+    }
+    itemTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+    itemTimeoutsRef.current.clear();
+    abortControllersRef.current.forEach(controller => controller.abort());
+    abortControllersRef.current.clear();
+    activeRequestsRef.current = 0;
+  };
+
+  for ()
 
   const startValidation = useCallback(async () => {
     if (!items.length) {
@@ -87,29 +104,60 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
 
         itemTimeoutsRef.current.add(timeoutId);
 
-        let audio = new Audio();
+        const audio = new Audio();
 
         const cleanupAudio = () => {
           if (audio) {
-            audio.removeEventListener("canplay", handleSuccess);
+            audio.removeEventListener("canplay", handleSuccessWithoutProxy);
+            audio.removeEventListener("canplay", handleSuccessWithProxy);
+            audio.removeEventListener("error", retryWithProxy);
             audio.removeEventListener("error", handleError);
           }
         };
 
-        const handleSuccess = () => {
+        const handleSuccessWithoutProxy = () => {
+          console.log(`success without proxy: ${item.url} `);
           clearTimeout(timeoutId);
           itemTimeoutsRef.current.delete(timeoutId);
           abortControllersRef.current.delete(controller);
           pendingUrls.delete(item.url);
           cleanupAudio();
-          const validAudio = createValidResult(item, audio);
+          const validAudio = createValidResult(item, audio, false);
           urlCache.set(item.url, validAudio);
-          // if (validAudio.duration !== null && !isNaN(validAudio.duration)) urlCache.set(item.url, validAudio);
           if (validAudio.duration !== null && !isNaN(validAudio.duration)) {
             urlCache.set(item.url, validAudio);
             resolve(validAudio);
           }
+        };
 
+        const retryWithProxy = () => {
+          console.log(`retry with proxy ${item.url}`);
+          cleanupAudio();
+          audio.addEventListener("canplay", handleSuccessWithProxy);
+          audio.addEventListener("error", handleError);
+          audio.src = addProxy(audio.src);
+
+          try {
+            audio.load()
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          } catch (error) { /* empty */
+            console.log("err1");
+          }
+        };
+
+        const handleSuccessWithProxy = () => {
+          console.log(`success with proxy: ${item.url} `);
+          clearTimeout(timeoutId);
+          itemTimeoutsRef.current.delete(timeoutId);
+          abortControllersRef.current.delete(controller);
+          pendingUrls.delete(item.url);
+          cleanupAudio();
+          const validAudio = createValidResult(item, audio, true);
+          urlCache.set(item.url, validAudio);
+          if (validAudio.duration !== null && !isNaN(validAudio.duration)) {
+            urlCache.set(item.url, validAudio);
+            resolve(validAudio);
+          }
         };
 
         const handleError = () => {
@@ -118,19 +166,20 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
           abortControllersRef.current.delete(controller);
           pendingUrls.delete(item.url);
           cleanupAudio();
+          console.log("err2");
           const invalidAudio = createInvalidResult(item);
           urlCache.set(item.url, invalidAudio);
           resolve(invalidAudio);
         };
 
-        audio = new Audio();
-        audio.addEventListener("canplay", handleSuccess);
-        audio.addEventListener("error", handleError);
-        audio.src = !item.cors ? addProxy(item.url) : item.url;
+        audio.addEventListener("canplay", handleSuccessWithoutProxy);
+        audio.addEventListener("error", retryWithProxy);
+        audio.src = item.url;
         try {
           audio.load();
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) { /* empty */
+          console.log("err1");
         }
       });
 
@@ -207,18 +256,19 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
     };
   }, [startValidation]);
 
-  return { isLoading, validatedItems: duplicatesRemoved };
+  return { isLoading, validatedItems: validated };
 };
 
-function createValidResult<T extends AudioItem>(item: T, audio: HTMLAudioElement): AudioTrackData {
-   const result = {
+function createValidResult<T extends AudioItem>(item: T, audio: HTMLAudioElement, isNeedProxy: boolean): AudioTrackData {
+  const result = {
     ...item,
     isValid: true,
     audioElem: audio,
     duration: audio.duration,
+    isNeedProxy: isNeedProxy,
   } as AudioTrackData;
 
-  if ('position' in item && (typeof item.position === 'number' || typeof item.position === 'undefined')) {
+  if ("position" in item && (typeof item.position === "number" || typeof item.position === "undefined")) {
     result.position = item.position;
   }
   return result;
@@ -231,10 +281,10 @@ function createInvalidResult<T extends AudioItem>(item: T): AudioTrackData {
     isValid: false,
     audioElem: null,
   } as AudioTrackData;
-  if ('position' in item && (typeof item.position === 'number' || typeof item.position === 'undefined')) {
+  if ("position" in item && (typeof item.position === "number" || typeof item.position === "undefined")) {
     result.position = item.position;
   }
-  return result
+  return result;
 }
 
 function addProxy(url: string) {
