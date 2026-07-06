@@ -2,5 +2,6 @@
 export const PATHS = {
     ROOT: "/",
     LIBRARY: "/library",
-    SEARCH: "/search"
+    SEARCH: "/search",
+    TEST: "/t1"
 }

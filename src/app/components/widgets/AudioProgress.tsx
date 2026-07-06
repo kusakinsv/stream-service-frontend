@@ -33,6 +33,8 @@ export const AudioProgress = ({ currentTime, duration, onChangeProgress }: Audio
 
   return (
     <Box sx={{
+      // margin: "0 auto",
+      // maxWidth: "900px",
       width: "100%",
       padding: {
         md: "0 5rem",

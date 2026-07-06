@@ -2,8 +2,8 @@ import type { AxiosError, AxiosResponse } from "axios";
 
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-import type { PlayListItem } from "@/app/types.ts";
 import type { BaseError } from "@/app/quires/types.ts";
+import type { PlayListItem, AudioTrackData } from "@/app/types.ts";
 
 import {
   addTrackToLibrary,
@@ -20,6 +20,8 @@ const EMPTY_LIST = {
   positions: [],
 } as PlayListMusicResponse;
 
+
+
 const saveToStorage = (data: PlayListMusicResponse) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -33,11 +35,16 @@ const loadFromStorage = () => {
   return data ? JSON.parse(data) as PlayListMusicResponse : EMPTY_LIST;
 };
 
-export const useGetMusicLibrary = () => {
+interface UseGetDataProps{
+  onDelete: (item: AudioTrackData) => void;
+  // onAddTrack: () => void;
+}
+
+export const useGetMusicLibrary = ({ onDelete }: UseGetDataProps) => {
 
   return useQuery<PlayListMusicResponse, AxiosError<BaseError>>({
     enabled: true,
-    queryKey: ["library"],
+    queryKey: ["library", {onDelete}],
     queryFn: async () => {
       try {
         const { data } = await getMyMusicLibrary();

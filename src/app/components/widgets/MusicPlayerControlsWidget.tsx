@@ -44,11 +44,18 @@ export const MusicPlayerControlsWidget = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{
+      margin: "0 auto",
+      maxWidth: "1200px",
+      width: "100%"
+    }}>
       <Stack spacing={1}>
         <Stack>
-          <AudioProgress currentTime={state.currentTime} duration={state.duration}
-                         onChangeProgress={onChangeProgress} />
+          <AudioProgress
+            currentTime={state.currentTime}
+            duration={state.duration}
+            onChangeProgress={onChangeProgress}
+          />
         </Stack>
         <Box>{state.currentTrack?.title ?? "-"}</Box>
         <Stack spacing={2} direction={"row"} sx={{

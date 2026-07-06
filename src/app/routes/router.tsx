@@ -1,15 +1,18 @@
 import { Route, Routes, Navigate, BrowserRouter, createHashRouter } from "react-router";
 
 import { PATHS } from "@/app/routes/paths.ts";
+import { TestWidget } from "@/pages/test/TestWidget.tsx";
 import { Layout } from "@/app/components/page/Layout.tsx";
 import { NavBar } from "@/app/components/navigateBar/NavBar.tsx";
 import { MusicLibraryPage } from "@/pages/musicLibrary/MusicLibraryPage.tsx";
 import { SearchMusicPage } from "@/pages/searchMusicPage/SearchMusicPage.tsx";
+import { MusicPlayerControlsWidget } from "@/app/components/widgets/MusicPlayerControlsWidget.tsx";
 
 
 const routes = [
   { path: PATHS.SEARCH, element: <SearchMusicPage /> },
   { path: PATHS.LIBRARY, element: <MusicLibraryPage /> },
+  { path: PATHS.TEST, element: <TestWidget /> },
 ];
 
 const router = createHashRouter([
@@ -31,6 +34,7 @@ export const Router = () => {
           <Routes>
             {routesElements}
           </Routes>
+          <MusicPlayerControlsWidget />
         </NavBar>
       </Layout>
     </BrowserRouter>);

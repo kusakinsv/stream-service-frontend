@@ -1,5 +1,5 @@
 import PauseIcon from "@mui/icons-material/Pause";
-import AddBoxIcon from '@mui/icons-material/AddBox';
+import AddBoxIcon from "@mui/icons-material/AddBox";
 import { Box, Stack, IconButton } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 
@@ -17,11 +17,11 @@ interface ITrackItemProps {
 }
 
 export const TrackItem = (
-  {item, isPlaying, currentTrackUrl, onPlayClick, onAddClick}: ITrackItemProps) => {
+  { item, isPlaying, currentTrackUrl, onPlayClick, onAddClick }: ITrackItemProps) => {
 
   const formattedDuration = item.duration ? formatDuration(item.duration) : "--:--";
 
-  const sxInvalid = {color: "grey"}
+  const sxInvalid = { color: "grey" };
 
   return (
     <Box sx={{
@@ -31,35 +31,34 @@ export const TrackItem = (
       backgroundColor: getColors().grey.panelsDark,
     }}>
       <Stack spacing={2} direction="row" sx={{
-      alignItems: "center",
-      justifyContent: "space-between",
-    }}>
-      <Stack spacing={2} direction="row" sx={{
         alignItems: "center",
-        justifyContent: "flex-start",
+        justifyContent: "space-between",
       }}>
-        <CircleButton disabled={!item.isValid} onClick={onPlayClick}>
-          {(currentTrackUrl === item.url && isPlaying) ? <PauseIcon /> : <PlayArrowIcon />}
-        </CircleButton>
         <Stack spacing={2} direction="row" sx={{
-          justifyContent: "space-between",
+          alignItems: "center",
+          justifyContent: "flex-start",
         }}>
-          <Box sx={!item.isValid ? sxInvalid : {}}>
-            {item.title}
-          </Box>
-          <Box sx={!item.isValid ? sxInvalid : {}}>
-            {formattedDuration}
-          </Box>
+          <CircleButton disabled={!item.isValid} onClick={onPlayClick}>
+            {(currentTrackUrl === item.url && isPlaying) ? <PauseIcon /> : <PlayArrowIcon />}
+          </CircleButton>
+          <Stack spacing={2} direction="row" sx={{
+            justifyContent: "space-between",
+          }}>
+            <Box sx={!item.isValid ? sxInvalid : {}}>
+              {item.title}
+            </Box>
+            <Box sx={!item.isValid ? sxInvalid : {}}>
+              {formattedDuration}
+            </Box>
+          </Stack>
         </Stack>
-      </Stack>
         <IconButton onClick={() => onAddClick(item)}>
           <AddBoxIcon fontSize={"large"} sx={{
-            color: 'grey.500',
-          "&:hover": {
-            // backgroundColor: "red",
-            color: getColors().blue.main
-          }
-        }}/>
+            color: "grey.500",
+            "&:hover": {
+              color: getColors().blue.main,
+            },
+          }} />
         </IconButton>
       </Stack>
     </Box>

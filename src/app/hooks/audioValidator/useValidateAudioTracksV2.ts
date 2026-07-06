@@ -3,7 +3,6 @@ import { useRef, useMemo, useState, useEffect, useCallback } from "react";
 import type { AudioItem, AudioTrackData } from "@/app/types.ts";
 
 import { PROXY_SERVER_URL } from "@/app/constants.ts";
-import { removeDuplicates } from "@/app/utils/utils.ts";
 
 interface UseFilterValidAudiosOptions {
   concurrency?: number;
@@ -26,22 +25,20 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
   itemTimeout = 1500,
   globalTimeout = 7000,
 }: UseFilterValidAudiosOptions): UseFilterValidAudiosResult<AudioTrackData> => {
-  const [validated, setValidated] = useState<AudioTrackData[]>([]);
-  // const duplicatesRemoved = useMemo(() => removeDuplicates(validated), [validated]);
+  const memoItems = useMemo(()=> items, []);
 
+  const [validated, setValidated] = useState<AudioTrackData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const activeRequestsRef = useRef(0);
   const abortControllersRef = useRef<Set<AbortController>>(new Set());
-
-
   const currentIndexRef = useRef(0);
   const isMountedRef = useRef(true);
   const globalTimeoutRef = useRef<number | undefined>();
   const itemTimeoutsRef = useRef<Set<number>>(new Set());
 
   //функиця очистки
-  const cleanup = () => {
+  const cleanup = useCallback(() => {
     if (globalTimeoutRef.current) {
       clearTimeout(globalTimeoutRef.current);
       globalTimeoutRef.current = undefined;
@@ -51,26 +48,115 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
     abortControllersRef.current.forEach(controller => controller.abort());
     abortControllersRef.current.clear();
     activeRequestsRef.current = 0;
-  };
+  }, []);
 
-  for ()
 
-  const startValidation = useCallback(async () => {
-    if (!items.length) {
+  const validateSingleAudio = useCallback((item: AudioItem): Promise<AudioTrackData> => {
+    const validationPromise = new Promise<AudioTrackData>((resolve) => {
+      const controller = new AbortController();
+      abortControllersRef.current.add(controller);
+
+      const timeoutId = window.setTimeout(() => {
+        controller.abort();
+        cleanupAudio();
+        const invalidAudio = createInvalidResult(item);
+        resolve(invalidAudio);
+      }, itemTimeout);
+
+      itemTimeoutsRef.current.add(timeoutId);
+
+      let audio = new Audio();
+
+      const cleanupAudio = () => {
+        if (audio) {
+          audio.removeEventListener("canplay", handleSuccessWithoutProxy);
+          audio.removeEventListener("canplay", handleSuccessWithProxy);
+          audio.removeEventListener("error", retryWithProxy);
+          audio.removeEventListener("error", handleError);
+          audio.src = "";
+        }
+      };
+
+      const handleSuccessWithoutProxy = () => {
+        console.log(`success without proxy: ${item.url} `);
+        clearTimeout(timeoutId);
+        itemTimeoutsRef.current.delete(timeoutId);
+        abortControllersRef.current.delete(controller);
+        cleanupAudio();
+        const validAudio = createValidResult(item, audio, false);
+        if (validAudio.duration !== null && !isNaN(validAudio.duration)) {
+          resolve(validAudio);
+        }
+      };
+
+      const retryWithProxy = () => {
+        console.log(`retry with proxy ${item.url}`);
+        cleanupAudio();
+        audio.remove();
+        audio = new Audio();
+        audio.addEventListener("canplay", handleSuccessWithProxy);
+        audio.addEventListener("error", handleError);
+        audio.src = addProxy(audio.src);
+        try {
+          audio.load();
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+          /* игнорируем */
+        }
+      };
+
+      const handleSuccessWithProxy = () => {
+        console.log(`success with proxy: ${item.url} `);
+        clearTimeout(timeoutId);
+        itemTimeoutsRef.current.delete(timeoutId);
+        abortControllersRef.current.delete(controller);
+        cleanupAudio();
+        const validAudio = createValidResult(item, audio, true);
+        if (validAudio.duration !== null && !isNaN(validAudio.duration)) {
+          resolve(validAudio);
+        }
+      };
+
+      const handleError = () => {
+        clearTimeout(timeoutId);
+        itemTimeoutsRef.current.delete(timeoutId);
+        abortControllersRef.current.delete(controller);
+        cleanupAudio();
+        console.log("err2");
+        const invalidAudio = createInvalidResult(item);
+        resolve(invalidAudio);
+      };
+
+
+      audio.addEventListener("canplay", handleSuccessWithoutProxy);
+      audio.addEventListener("error", retryWithProxy);
+      audio.src = item.url;
+      try {
+        audio.load();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) { /* empty */
+        /* игнорируем */
+      }
+    });
+
+    return validationPromise;
+  },[itemTimeout]);
+
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    setValidated([]);
+    setIsLoading(true);
+
+    if (!memoItems.length) {
       setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
-    setValidated([]);
+    // Сбрасываем индексы и счётчики перед запуском
     currentIndexRef.current = 0;
     activeRequestsRef.current = 0;
 
-    const urlCache = new Map<string, AudioTrackData>();
-    const pendingUrls = new Map<string, Promise<AudioTrackData>>();
-    const addedUrls = new Set<string>();
-
-    // Глобальный таймаут
     globalTimeoutRef.current = window.setTimeout(() => {
       cleanup();
       if (isMountedRef.current) {
@@ -78,146 +164,29 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
       }
     }, globalTimeout);
 
-    const validateSingleAudio = (item: AudioItem): Promise<AudioTrackData> => {
-      if (urlCache.has(item.url)) {
-        console.log(item.url + " Уже проверялся");
-        return Promise.resolve(urlCache.get(item.url)!);
-      }
+    // return () => {
+    //   isMountedRef.current = false;
+    //   if (globalTimeoutRef.current) {
+    //     clearTimeout(globalTimeoutRef.current);
+    //   }
+    //   itemTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+    //   abortControllersRef.current.forEach(controller => controller.abort());
+    // };
 
-      if (pendingUrls.has(item.url)) {
-        console.log(item.url + " Сейчас проверяется");
-        return pendingUrls.get(item.url)!;
-      }
-
-      const validationPromise = new Promise<AudioTrackData>((resolve) => {
-        const controller = new AbortController();
-        abortControllersRef.current.add(controller);
-
-        const timeoutId = window.setTimeout(() => {
-          controller.abort();
-          cleanupAudio();
-          pendingUrls.delete(item.url);
-          const invalidAudio = createInvalidResult(item);
-          urlCache.set(item.url, invalidAudio);
-          resolve(invalidAudio);
-        }, itemTimeout);
-
-        itemTimeoutsRef.current.add(timeoutId);
-
-        const audio = new Audio();
-
-        const cleanupAudio = () => {
-          if (audio) {
-            audio.removeEventListener("canplay", handleSuccessWithoutProxy);
-            audio.removeEventListener("canplay", handleSuccessWithProxy);
-            audio.removeEventListener("error", retryWithProxy);
-            audio.removeEventListener("error", handleError);
-          }
-        };
-
-        const handleSuccessWithoutProxy = () => {
-          console.log(`success without proxy: ${item.url} `);
-          clearTimeout(timeoutId);
-          itemTimeoutsRef.current.delete(timeoutId);
-          abortControllersRef.current.delete(controller);
-          pendingUrls.delete(item.url);
-          cleanupAudio();
-          const validAudio = createValidResult(item, audio, false);
-          urlCache.set(item.url, validAudio);
-          if (validAudio.duration !== null && !isNaN(validAudio.duration)) {
-            urlCache.set(item.url, validAudio);
-            resolve(validAudio);
-          }
-        };
-
-        const retryWithProxy = () => {
-          console.log(`retry with proxy ${item.url}`);
-          cleanupAudio();
-          audio.addEventListener("canplay", handleSuccessWithProxy);
-          audio.addEventListener("error", handleError);
-          audio.src = addProxy(audio.src);
-
-          try {
-            audio.load()
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          } catch (error) { /* empty */
-            console.log("err1");
-          }
-        };
-
-        const handleSuccessWithProxy = () => {
-          console.log(`success with proxy: ${item.url} `);
-          clearTimeout(timeoutId);
-          itemTimeoutsRef.current.delete(timeoutId);
-          abortControllersRef.current.delete(controller);
-          pendingUrls.delete(item.url);
-          cleanupAudio();
-          const validAudio = createValidResult(item, audio, true);
-          urlCache.set(item.url, validAudio);
-          if (validAudio.duration !== null && !isNaN(validAudio.duration)) {
-            urlCache.set(item.url, validAudio);
-            resolve(validAudio);
-          }
-        };
-
-        const handleError = () => {
-          clearTimeout(timeoutId);
-          itemTimeoutsRef.current.delete(timeoutId);
-          abortControllersRef.current.delete(controller);
-          pendingUrls.delete(item.url);
-          cleanupAudio();
-          console.log("err2");
-          const invalidAudio = createInvalidResult(item);
-          urlCache.set(item.url, invalidAudio);
-          resolve(invalidAudio);
-        };
-
-        audio.addEventListener("canplay", handleSuccessWithoutProxy);
-        audio.addEventListener("error", retryWithProxy);
-        audio.src = item.url;
-        try {
-          audio.load();
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) { /* empty */
-          console.log("err1");
-        }
-      });
-
-      pendingUrls.set(item.url, validationPromise);
-      validationPromise.finally(() => {
-        pendingUrls.delete(item.url);
-      });
-
-      return validationPromise;
-    };
-
-    const cleanup = () => {
-      if (globalTimeoutRef.current) {
-        clearTimeout(globalTimeoutRef.current);
-        globalTimeoutRef.current = undefined;
-      }
-      itemTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
-      itemTimeoutsRef.current.clear();
-      abortControllersRef.current.forEach(controller => controller.abort());
-      abortControllersRef.current.clear();
-      activeRequestsRef.current = 0;
-    };
-
-    const startNextIfNeeded = async () => {
+    const startNextIfNeeded = () => {
       while (
         isMountedRef.current &&
         activeRequestsRef.current < concurrency &&
-        currentIndexRef.current < items.length
+        currentIndexRef.current < memoItems.length
         ) {
         const index = currentIndexRef.current;
-        const item = items[index];
+        const item = memoItems[index];
         currentIndexRef.current++;
         activeRequestsRef.current++;
 
         validateSingleAudio(item)
           .then((result) => {
-            if (isMountedRef.current && !addedUrls.has(item.url)) {
-              addedUrls.add(item.url);
+            if (isMountedRef.current) {
               setValidated(prev => [...prev, result]);
             }
           })
@@ -229,7 +198,7 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
 
       if (
         activeRequestsRef.current === 0 &&
-        currentIndexRef.current >= items.length &&
+        currentIndexRef.current >= memoItems.length &&
         isMountedRef.current
       ) {
         cleanup();
@@ -237,24 +206,16 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
       }
     };
 
-    for (let i = 0; i < Math.min(concurrency, items.length); i++) {
+    for (let i = 0; i < Math.min(concurrency, memoItems.length); i++) {
       startNextIfNeeded();
     }
-  }, [items, concurrency, itemTimeout, globalTimeout]);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    startValidation();
 
     return () => {
       isMountedRef.current = false;
-      if (globalTimeoutRef.current) {
-        clearTimeout(globalTimeoutRef.current);
-      }
-      itemTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
-      abortControllersRef.current.forEach(controller => controller.abort());
+      cleanup();
     };
-  }, [startValidation]);
+
+  }, [memoItems, concurrency]);
 
   return { isLoading, validatedItems: validated };
 };

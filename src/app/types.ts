@@ -1,7 +1,7 @@
 export type AudioItem = {
   url: string;
   title: string;
-  cors: boolean;
+  cors?: boolean;
 }
 
 export type SearchedTrack = {
@@ -17,8 +17,8 @@ export type MusicTrack = {
 
 export type AudioTrackData = {
   position?: number;
-  url: string,
-  title: string,
+  url: string;
+  title: string;
   isValid: boolean;
   isNeedProxy?: boolean;
   duration: null | number;
