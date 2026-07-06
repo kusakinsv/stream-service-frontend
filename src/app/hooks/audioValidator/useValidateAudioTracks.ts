@@ -92,6 +92,8 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
         const cleanupAudio = () => {
           if (audio) {
             audio.removeEventListener("canplay", handleSuccess);
+            audio.removeEventListener("error", retryWithProxy);
+            audio.removeEventListener("canplay", handleSuccess);
             audio.removeEventListener("error", handleError);
           }
         };
@@ -102,14 +104,40 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
           abortControllersRef.current.delete(controller);
           pendingUrls.delete(item.url);
           cleanupAudio();
-          const validAudio = createValidResult(item, audio);
+          const validAudio = createValidResult(item, audio, false);
           urlCache.set(item.url, validAudio);
           // if (validAudio.duration !== null && !isNaN(validAudio.duration)) urlCache.set(item.url, validAudio);
           if (validAudio.duration !== null && !isNaN(validAudio.duration)) {
             urlCache.set(item.url, validAudio);
             resolve(validAudio);
           }
+        };
 
+        const retryWithProxy = () => {
+          cleanupAudio();
+          audio.addEventListener("canplay", handleSuccessWithProxy);
+          audio.addEventListener("error", handleError);
+          audio.src = addProxy(item.url);
+          try {
+            audio.load();
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          } catch (error) { /* empty */
+          }
+
+        };
+
+        const handleSuccessWithProxy = () => {
+          clearTimeout(timeoutId);
+          itemTimeoutsRef.current.delete(timeoutId);
+          abortControllersRef.current.delete(controller);
+          pendingUrls.delete(item.url);
+          cleanupAudio();
+          const validAudio = createValidResult(item, audio, true);
+          urlCache.set(item.url, validAudio);
+          if (validAudio.duration !== null && !isNaN(validAudio.duration)) {
+            urlCache.set(item.url, validAudio);
+            resolve(validAudio);
+          }
         };
 
         const handleError = () => {
@@ -125,8 +153,8 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
 
         audio = new Audio();
         audio.addEventListener("canplay", handleSuccess);
-        audio.addEventListener("error", handleError);
-        audio.src = !item.cors ? addProxy(item.url) : item.url;
+        audio.addEventListener("error", retryWithProxy);
+        audio.src = item.url;
         try {
           audio.load();
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -205,20 +233,21 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
       itemTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
       abortControllersRef.current.forEach(controller => controller.abort());
     };
-  }, [startValidation]);
+  }, [items, startValidation]);
 
   return { isLoading, validatedItems: duplicatesRemoved };
 };
 
-function createValidResult<T extends AudioItem>(item: T, audio: HTMLAudioElement): AudioTrackData {
-   const result = {
+function createValidResult<T extends AudioItem>(item: T, audio: HTMLAudioElement, isNeedProxy: boolean): AudioTrackData {
+  const result = {
     ...item,
     isValid: true,
     audioElem: audio,
     duration: audio.duration,
+    isNeedProxy: isNeedProxy,
   } as AudioTrackData;
 
-  if ('position' in item && (typeof item.position === 'number' || typeof item.position === 'undefined')) {
+  if ("position" in item && (typeof item.position === "number" || typeof item.position === "undefined")) {
     result.position = item.position;
   }
   return result;
@@ -231,10 +260,10 @@ function createInvalidResult<T extends AudioItem>(item: T): AudioTrackData {
     isValid: false,
     audioElem: null,
   } as AudioTrackData;
-  if ('position' in item && (typeof item.position === 'number' || typeof item.position === 'undefined')) {
+  if ("position" in item && (typeof item.position === "number" || typeof item.position === "undefined")) {
     result.position = item.position;
   }
-  return result
+  return result;
 }
 
 function addProxy(url: string) {
