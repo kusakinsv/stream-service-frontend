@@ -71,11 +71,14 @@ export const MusicLibraryWidget = () => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      setItems((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+        const movedArr = arrayMove(items, oldIndex, newIndex);
+        for (let i = 0; i < movedArr.length; i++){
+          movedArr[i].position = i+1;
+        }
+      setItems( movedArr);
+      
     }
 
 
@@ -170,7 +173,8 @@ export const MusicLibraryWidget = () => {
           <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
             {data?.title}
           </Typography>
-          {isLoading || isValidationLoading ? "Loading..." : (<Container maxWidth="md">
+          {isLoading || isValidationLoading ? "Loading..." : (
+            // <Container maxWidth="md">
             <Box sx={{ py: 1 }}>
 
               <DndContext
@@ -196,7 +200,9 @@ export const MusicLibraryWidget = () => {
                 </Paper>
               )}
             </Box>
-          </Container>)}
+          // </Container>
+            )
+        }
 
 
 

@@ -3,6 +3,7 @@ import type { PlayListItem } from "@/app/types.ts";
 import { streamServiceClient } from "@/app/api/client.ts";
 
 export type PlayListMusicResponse = {
+  id: number;
   title: string | undefined,
   positions: PlayListItem[]
 }
@@ -24,4 +25,8 @@ export const deleteTrackFromLibrary = (item: PlayListItem) => {
   return streamServiceClient.delete<PlayListMusicResponse>("/stream-service/api/v1/library", {
     data: item
   })
+};
+
+export const updatePlayList = () => {
+  return streamServiceClient.get<PlayListMusicResponse>("/stream-service/api/v1/library")
 };

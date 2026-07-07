@@ -5,6 +5,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import type { BaseError } from "@/app/quires/types.ts";
 import type { PlayListItem, AudioTrackData } from "@/app/types.ts";
 
+import { EMPTY_LIST, savePlayListToStorage, loadPlayListFromStorage } from "@/app/utils/playListUtils.ts";
 import {
   addTrackToLibrary,
   getMyMusicLibrary,
@@ -13,27 +14,6 @@ import {
   type PlayListMusicResponse,
 } from "@/app/quires/libraryQuires.ts";
 
-const STORAGE_KEY = "library";
-
-const EMPTY_LIST = {
-  title: undefined,
-  positions: [],
-} as PlayListMusicResponse;
-
-
-
-const saveToStorage = (data: PlayListMusicResponse) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch (error) {
-    console.error("Error saving to localStorage:", error);
-  }
-};
-
-const loadFromStorage = () => {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) as PlayListMusicResponse : EMPTY_LIST;
-};
 
 interface UseGetDataProps{
   onDelete: (item: AudioTrackData) => void;
@@ -51,11 +31,11 @@ export const useGetMusicLibrary = ({ onDelete }: UseGetDataProps) => {
         const hasData = data?.positions?.length > 0;
 
         if (hasData) {
-          saveToStorage(data);
+          savePlayListToStorage(data);
           return data;
         }
 
-        const cached = loadFromStorage();
+        const cached = loadPlayListFromStorage();
         if (cached?.positions?.length > 0) {
           return cached;
         }
@@ -63,7 +43,7 @@ export const useGetMusicLibrary = ({ onDelete }: UseGetDataProps) => {
         return EMPTY_LIST
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        const cached = loadFromStorage();
+        const cached = loadPlayListFromStorage();
         if (cached?.positions?.length > 0) {
           return cached;
         }
