@@ -26,6 +26,7 @@ export type AudioTrackData = {
 }
 
 export type PlayListItem = {
+  position: number,
   title: string,
   url: string,
   duration: null | number,

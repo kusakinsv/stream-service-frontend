@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { Box, List, Paper, Stack, Container, Typography } from "@mui/material";
+import { Box, List, Paper, Stack, Typography } from "@mui/material";
 import {
   arrayMove,
   SortableContext,
@@ -19,45 +19,33 @@ import {
 import type { AudioTrackData } from "@/app/types.ts";
 import type { DraggableItem } from "@/app/components/dnd/types.ts";
 
-import { mapToPlayListItem } from "@/app/utils/utils.ts";
+import { useReOrderPlaylist } from "@/app/quires/usePlaylist.ts";
 import { SortableItem } from "@/app/components/dnd/SortableItem.tsx";
 import { PlayListTrackItem } from "@/pages/musicLibrary/PlayListTrackItem.tsx";
 import { useAudioStore } from "@/app/store/GlobalPlayerStore/useAudioPlayerState.ts";
 import { useGetMusicLibrary, useDeleteTrackFromLibrary } from "@/app/quires/useLibrary.ts";
 import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAudioTracks.ts";
+import { mapToPlayList, mapToPlayListItem, savePlayListToStorage } from "@/app/utils/playlistUtils.ts";
 
 
 export const MusicLibraryWidget = () => {
+
   const handleDeleteItem = (item: AudioTrackData) => {
+    // setItems((items) => items.filter((i) => i.url !== item.url));
     deleteItem(mapToPlayListItem(item));
   };
 
 
   const { data, isLoading } = useGetMusicLibrary({ onDelete: handleDeleteItem });
   const { mutate: deleteItem } = useDeleteTrackFromLibrary();
-
+  const { mutate: reOrderPlaylist, data: reordered } = useReOrderPlaylist();
   const { isPlaying, currentTrack, setCurrentTrack, togglePlay } = useAudioStore();
 
   const { isLoading: isValidationLoading, validatedItems } = useValidateAudioTracks(data?.positions ?? [], {
-    concurrency: 2,
+    concurrency: 3,
     itemTimeout: 10000,
     globalTimeout: 20000,
   });
-
-  // const playList = useMemo(() => validatedItems
-  //   .sort((o1, o2) => (o1.position ?? Infinity) - (o2.position ?? Infinity))
-  //   .map(item => {
-  //       // console.log(item.url);
-  //       return <PlayListTrackItem
-  //         item={item}
-  //         isPlaying={isPlaying}
-  //         currentTrackUrl={currentTrack?.url}
-  //         key={item.url}
-  //         onClick={() => onItemPlayButtonClickHandler(item, validatedItems)}
-  //         onDeleteClick={() => handleDeleteItem(item)}
-  //       />;
-  //     },
-  //   ), [validatedItems, isPlaying, deleteItem, currentTrack, setCurrentTrack, togglePlay]);
 
   const onItemPlayButtonClickHandler = (item: AudioTrackData, trackList: AudioTrackData[]) => {
     if (currentTrack?.url !== item.url) {
@@ -71,22 +59,21 @@ export const MusicLibraryWidget = () => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        const movedArr = arrayMove(items, oldIndex, newIndex);
-        for (let i = 0; i < movedArr.length; i++){
-          movedArr[i].position = i+1;
-        }
-      setItems( movedArr);
-      
+      const oldIndex = items.findIndex((item) => item.id === active.id);
+      const newIndex = items.findIndex((item) => item.id === over.id);
+      const movedArr = arrayMove(items, oldIndex, newIndex);
+      for (let i = 0; i < movedArr.length; i++) {
+        movedArr[i].position = i + 1;
+      }
+      setItems(movedArr);
+      console.log(data !== null && data !== undefined);
+      if (data) {
+        reOrderPlaylist({ id: data.id, positions: mapToPlayList(movedArr) });
+      }
     }
-
-
   };
 
-  const handleDelete = (id: string) => {
-    setItems((items) => items.filter((item) => item.id !== id));
-  };
+  if (reordered) savePlayListToStorage(reordered?.data);
 
   const draggables: DraggableItem<AudioTrackData>[] = useMemo(() => validatedItems
     .sort((o1, o2) => (o1.position ?? Infinity) - (o2.position ?? Infinity))
@@ -142,12 +129,9 @@ export const MusicLibraryWidget = () => {
             onClick={() => onItemPlayButtonClickHandler(value, validatedItems)}
             onDeleteClick={() => handleDeleteItem(value)}
           />}
-          onDelete={handleDelete}
-
         />
       );
     });
-
 
 
   const sensors = useSensors(
@@ -160,8 +144,6 @@ export const MusicLibraryWidget = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
-
-  console.log(JSON.stringify(items));
 
   return (
     <Stack sx={{
@@ -200,10 +182,9 @@ export const MusicLibraryWidget = () => {
                 </Paper>
               )}
             </Box>
-          // </Container>
-            )
-        }
-
+            // </Container>
+          )
+          }
 
 
           {/*<Stack>*/}

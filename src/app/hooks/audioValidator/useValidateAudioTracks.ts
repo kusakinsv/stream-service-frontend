@@ -91,14 +91,16 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
 
         const cleanupAudio = () => {
           if (audio) {
-            audio.removeEventListener("canplay", handleSuccess);
-            audio.removeEventListener("error", retryWithProxy);
-            audio.removeEventListener("canplay", handleSuccess);
+            // audio.removeEventListener("canplay", handleSuccess);
+            // audio.removeEventListener("error", retryWithProxy);
+            audio.removeEventListener("canplay", handleSuccessWithProxy);
             audio.removeEventListener("error", handleError);
           }
         };
 
         const handleSuccess = () => {
+          const url = item.url
+          console.log(item.title + " : " + url);
           clearTimeout(timeoutId);
           itemTimeoutsRef.current.delete(timeoutId);
           abortControllersRef.current.delete(controller);
@@ -106,7 +108,6 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
           cleanupAudio();
           const validAudio = createValidResult(item, audio, false);
           urlCache.set(item.url, validAudio);
-          // if (validAudio.duration !== null && !isNaN(validAudio.duration)) urlCache.set(item.url, validAudio);
           if (validAudio.duration !== null && !isNaN(validAudio.duration)) {
             urlCache.set(item.url, validAudio);
             resolve(validAudio);
@@ -114,10 +115,20 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
         };
 
         const retryWithProxy = () => {
+          clearTimeout(timeoutId);
+          itemTimeoutsRef.current.delete(timeoutId);
+          abortControllersRef.current.delete(controller);
+          audio.removeEventListener("canplay", handleSuccess);
+          audio.removeEventListener("error", retryWithProxy);
+
+          // console.log("err2");
           cleanupAudio();
           audio.addEventListener("canplay", handleSuccessWithProxy);
           audio.addEventListener("error", handleError);
-          audio.src = addProxy(item.url);
+          const url = addProxy(item.url)
+          // console.log(item.title + " : " + url);
+          audio.src = url;
+          // console.log("proxyUrl: " + item.url);
           try {
             audio.load();
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -141,6 +152,7 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
         };
 
         const handleError = () => {
+          // console.log("err3");
           clearTimeout(timeoutId);
           itemTimeoutsRef.current.delete(timeoutId);
           abortControllersRef.current.delete(controller);
@@ -154,11 +166,13 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
         audio = new Audio();
         audio.addEventListener("canplay", handleSuccess);
         audio.addEventListener("error", retryWithProxy);
-        audio.src = item.url;
+        const url = item.url
+        audio.src = url;
         try {
           audio.load();
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) { /* empty */
+          // console.log("err1");
         }
       });
 

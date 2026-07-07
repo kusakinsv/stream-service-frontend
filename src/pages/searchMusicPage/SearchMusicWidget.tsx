@@ -3,9 +3,10 @@ import { Box, List, Stack } from "@mui/material";
 
 import type { AudioTrackData } from "@/app/types.ts";
 
+import { removeDuplicates } from "@/app/utils/utils.ts";
+import { mapToPlayListItem } from "@/app/utils/playlistUtils.ts";
 import { useAddTrackToLibrary } from "@/app/quires/useLibrary.ts";
 import { SearchPanel } from "@/pages/searchMusicPage/SearchPanel.tsx";
-import { removeDuplicates, mapToPlayListItem } from "@/app/utils/utils.ts";
 import { useSearchMusicTracks } from "@/app/quires/useSearchMusicTracks.ts";
 import { useAudioStore } from "@/app/store/GlobalPlayerStore/useAudioPlayerState.ts";
 import { TrackItem } from "@/pages/searchMusicPage/components/trackItem/TrackItem.tsx";
@@ -54,8 +55,6 @@ export const SearchMusicWidget = () => {
 
     [validatedItems],
   );
-
-  console.log(validatedItems.length);
 
   // const trackList = useMemo(() => mockTracks
   const trackList = useMemo(() => trackListFiltered

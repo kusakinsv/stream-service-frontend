@@ -5,13 +5,13 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import type { BaseError } from "@/app/quires/types.ts";
 import type { PlayListItem, AudioTrackData } from "@/app/types.ts";
 
-import { EMPTY_LIST, savePlayListToStorage, loadPlayListFromStorage } from "@/app/utils/playListUtils.ts";
+import { EMPTY_LIST, savePlayListToStorage, loadPlayListFromStorage } from "@/app/utils/playlistUtils.ts";
 import {
   addTrackToLibrary,
   getMyMusicLibrary,
+  type MusicPlaylist,
   deleteTrackFromLibrary,
   deleteTrackFromLibraryById,
-  type PlayListMusicResponse,
 } from "@/app/quires/libraryQuires.ts";
 
 
@@ -22,7 +22,7 @@ interface UseGetDataProps{
 
 export const useGetMusicLibrary = ({ onDelete }: UseGetDataProps) => {
 
-  return useQuery<PlayListMusicResponse, AxiosError<BaseError>>({
+  return useQuery<MusicPlaylist, AxiosError<BaseError>>({
     enabled: true,
     queryKey: ["library", {onDelete}],
     queryFn: async () => {
@@ -55,20 +55,20 @@ export const useGetMusicLibrary = ({ onDelete }: UseGetDataProps) => {
 };
 
 export const useAddTrackToLibrary = () => {
-  return useMutation<AxiosResponse<PlayListMusicResponse>, AxiosError<BaseError>, PlayListItem>({
+  return useMutation<AxiosResponse<MusicPlaylist>, AxiosError<BaseError>, PlayListItem>({
     mutationFn: (item: PlayListItem) => addTrackToLibrary(item),
   });
 };
 
 //todo переделать на url
 export const useDeleteTrackFromLibraryById = () => {
-  return useMutation<AxiosResponse<PlayListMusicResponse>, AxiosError<BaseError>, number>({
+  return useMutation<AxiosResponse<MusicPlaylist>, AxiosError<BaseError>, number>({
     mutationFn: (position: number) => deleteTrackFromLibraryById(position),
   });
 };
 
 export const useDeleteTrackFromLibrary = () => {
-  return useMutation<AxiosResponse<PlayListMusicResponse>, AxiosError<BaseError>, PlayListItem>({
+  return useMutation<AxiosResponse<MusicPlaylist>, AxiosError<BaseError>, PlayListItem>({
     mutationFn: (item: PlayListItem) => deleteTrackFromLibrary(item),
   });
 };
