@@ -9,9 +9,12 @@ export const EMPTY_LIST = {
   positions: [],
 } as MusicPlaylist;
 
+//todo перепилить чтоб забирать лист по id
 export const savePlayListToStorage = (data: MusicPlaylist) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    if (data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
   } catch (error) {
     console.error("Error saving to localStorage:", error);
   }
