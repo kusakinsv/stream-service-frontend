@@ -28,6 +28,7 @@ import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAu
 import { mapToPlayList, mapToPlayListItem, savePlayListToStorage } from "@/app/utils/playlistUtils.ts";
 
 
+
 export const MusicLibraryWidget = () => {
 
   const handleDeleteItem = (item: AudioTrackData) => {
@@ -45,6 +46,7 @@ export const MusicLibraryWidget = () => {
     concurrency: 3,
     itemTimeout: 10000,
     globalTimeout: 20000,
+    checkWithProxyAfter: 3000
   });
 
   const onItemPlayButtonClickHandler = (item: AudioTrackData, trackList: AudioTrackData[]) => {

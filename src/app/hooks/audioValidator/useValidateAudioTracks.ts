@@ -8,6 +8,7 @@ import { removeDuplicates } from "@/app/utils/utils.ts";
 interface UseFilterValidAudiosOptions {
   concurrency?: number;
   itemTimeout?: number;
+  checkWithProxyAfter?: number;
   globalTimeout?: number;
 }
 
@@ -18,6 +19,8 @@ interface UseFilterValidAudiosResult<T extends AudioTrackData> {
 
 const PROXY_SERVER_PART = "/api/v1/proxy?url=";
 
+const validationCache = new Map<string, AudioTrackData>();
+
 /**
  * из-за конкуррентности может вызывать дубли
  */
@@ -25,7 +28,9 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
   concurrency = 3,
   itemTimeout = 1500,
   globalTimeout = 7000,
+  checkWithProxyAfter = 3000
 }: UseFilterValidAudiosOptions): UseFilterValidAudiosResult<AudioTrackData> => {
+
   const [validated, setValidated] = useState<AudioTrackData[]>([]);
   const duplicatesRemoved = useMemo(() => removeDuplicates(validated), [validated]);
 
@@ -88,6 +93,20 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
         itemTimeoutsRef.current.add(timeoutId);
 
         let audio = new Audio();
+        let isProxyAttempted = false;
+
+        const quickTimeout = window.setTimeout(() => {
+          if (isProxyAttempted) return;
+
+          // Принудительно останавливаем audio
+          if (audio) {
+            audio.src = '';
+            audio.load();
+          }
+          controller.abort();
+          cleanupAudio();
+          retryWithProxy();
+        }, checkWithProxyAfter);
 
         const cleanupAudio = () => {
           if (audio) {
@@ -102,6 +121,7 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
           const url = item.url
           console.log(item.title + " : " + url);
           clearTimeout(timeoutId);
+          clearTimeout(quickTimeout);
           itemTimeoutsRef.current.delete(timeoutId);
           abortControllersRef.current.delete(controller);
           pendingUrls.delete(item.url);
@@ -110,14 +130,18 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
           urlCache.set(item.url, validAudio);
           if (validAudio.duration !== null && !isNaN(validAudio.duration)) {
             urlCache.set(item.url, validAudio);
+
+            validationCache.set(item.url, validAudio)
             resolve(validAudio);
           }
         };
 
         const retryWithProxy = () => {
+          if (isProxyAttempted) return;
+          isProxyAttempted = true;
+          abortControllersRef.current.delete(controller);
           clearTimeout(timeoutId);
           itemTimeoutsRef.current.delete(timeoutId);
-          abortControllersRef.current.delete(controller);
           audio.removeEventListener("canplay", handleSuccess);
           audio.removeEventListener("error", retryWithProxy);
 
@@ -126,7 +150,7 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
           audio.addEventListener("canplay", handleSuccessWithProxy);
           audio.addEventListener("error", handleError);
           const url = addProxy(item.url)
-          // console.log(item.title + " : " + url);
+          console.log("poxy: " + item.title + " : " + url);
           audio.src = url;
           // console.log("proxyUrl: " + item.url);
           try {
@@ -139,6 +163,7 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
 
         const handleSuccessWithProxy = () => {
           clearTimeout(timeoutId);
+          clearTimeout(quickTimeout);
           itemTimeoutsRef.current.delete(timeoutId);
           abortControllersRef.current.delete(controller);
           pendingUrls.delete(item.url);
@@ -147,6 +172,8 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
           urlCache.set(item.url, validAudio);
           if (validAudio.duration !== null && !isNaN(validAudio.duration)) {
             urlCache.set(item.url, validAudio);
+
+            validationCache.set(item.url, validAudio)
             resolve(validAudio);
           }
         };
@@ -206,6 +233,15 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
         const item = items[index];
         currentIndexRef.current++;
         activeRequestsRef.current++;
+        //Если трек уже проверялся, и он валиден - пропуск
+        if (validationCache.has(item.url)) {
+          const validItem = validationCache.get(item.url);
+          if (validItem) {
+            setValidated(prev => [...prev, validItem]);
+            activeRequestsRef.current--;
+            continue;
+          }
+        };
 
         validateSingleAudio(item)
           .then((result) => {
