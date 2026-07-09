@@ -5,9 +5,9 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
 import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
 
+import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
 import { AudioProgress } from "@/app/components/widgets/AudioProgress.tsx";
 import { VolumeControl } from "@/app/components/widgets/VolumeControl.tsx";
-import { useAudioStore } from "@/app/store/GlobalPlayerStore/useAudioPlayerState.ts";
 
 const sxIconsArrow = {
   fontSize: "3rem",

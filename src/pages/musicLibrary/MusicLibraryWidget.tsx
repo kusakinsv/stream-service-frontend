@@ -20,9 +20,9 @@ import type { AudioTrackData } from "@/app/types.ts";
 import type { DraggableItem } from "@/app/components/dnd/types.ts";
 
 import { useReOrderPlaylist } from "@/app/quires/usePlaylist.ts";
+import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
 import { SortableItem } from "@/app/components/dnd/SortableItem.tsx";
 import { PlayListTrackItem } from "@/pages/musicLibrary/PlayListTrackItem.tsx";
-import { useAudioStore } from "@/app/store/GlobalPlayerStore/useAudioPlayerState.ts";
 import { useGetMusicLibrary, useDeleteTrackFromLibrary } from "@/app/quires/useLibrary.ts";
 import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAudioTracks.ts";
 import { mapToPlayList, mapToPlayListItem, savePlayListToStorage } from "@/app/utils/playlistUtils.ts";
@@ -31,22 +31,28 @@ import { mapToPlayList, mapToPlayListItem, savePlayListToStorage } from "@/app/u
 
 export const MusicLibraryWidget = () => {
 
+  const [items, setItems] = useState<DraggableItem<AudioTrackData>[]>([]);
+
+
+
+  const { mutate: deleteItem } = useDeleteTrackFromLibrary();
+  const { data, isLoading, refetch } = useGetMusicLibrary({});
+
   const handleDeleteItem = (item: AudioTrackData) => {
-    // setItems((items) => items.filter((i) => i.url !== item.url));
+    setItems((items) => items.filter((i) => i.url !== item.url));
     deleteItem(mapToPlayListItem(item));
   };
 
-
-  const { data, isLoading } = useGetMusicLibrary({ onDelete: handleDeleteItem });
-  const { mutate: deleteItem } = useDeleteTrackFromLibrary();
   const { mutate: reOrderPlaylist, data: reordered } = useReOrderPlaylist();
   const { isPlaying, currentTrack, setCurrentTrack, togglePlay } = useAudioStore();
 
+
+
   const { isLoading: isValidationLoading, validatedItems } = useValidateAudioTracks(data?.positions ?? [], {
-    concurrency: 3,
-    itemTimeout: 10000,
-    globalTimeout: 20000,
-    checkWithProxyAfter: 3000
+    concurrency: 5,
+    itemTimeout: 2000,
+    globalTimeout: 10000,
+    checkWithProxyAfter: 1500
   });
 
   const onItemPlayButtonClickHandler = (item: AudioTrackData, trackList: AudioTrackData[]) => {
@@ -111,7 +117,9 @@ export const MusicLibraryWidget = () => {
   //   id: String(index),
   // })), [tracks]);
 
-  const [items, setItems] = useState<DraggableItem<AudioTrackData>[]>(draggables);
+
+
+
 
   useEffect(() => {
     setItems(draggables);

@@ -3,7 +3,7 @@ import { Box, Stack, Slider } from "@mui/material";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeDownIcon from "@mui/icons-material/VolumeDown";
 
-import { useAudioStore } from "@/app/store/GlobalPlayerStore/useAudioPlayerState.ts";
+import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
 
 export const VolumeControl = () => {
   const { setVolume, audioRef, volume } = useAudioStore();

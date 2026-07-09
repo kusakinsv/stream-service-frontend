@@ -26,9 +26,8 @@ interface AudioPlayerState {
   updateProgress: () => void;
 
   setCurrentTrack: (track: AudioTrackData, ofPlayList: AudioTrackData[]) => void;
-  setVolume: (volume: number) => void;
-
   setCurrentPlaylist: (playlist: AudioTrackData[]) => void;
+  setVolume: (volume: number) => void;
 }
 
 export const useAudioStore = create<AudioPlayerState>()(

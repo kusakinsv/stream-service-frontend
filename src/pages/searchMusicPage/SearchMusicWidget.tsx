@@ -6,9 +6,9 @@ import type { AudioTrackData } from "@/app/types.ts";
 import { removeDuplicates } from "@/app/utils/utils.ts";
 import { mapToPlayListItem } from "@/app/utils/playlistUtils.ts";
 import { useAddTrackToLibrary } from "@/app/quires/useLibrary.ts";
+import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
 import { SearchPanel } from "@/pages/searchMusicPage/SearchPanel.tsx";
 import { useSearchMusicTracks } from "@/app/quires/useSearchMusicTracks.ts";
-import { useAudioStore } from "@/app/store/GlobalPlayerStore/useAudioPlayerState.ts";
 import { TrackItem } from "@/pages/searchMusicPage/components/trackItem/TrackItem.tsx";
 import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAudioTracks.ts";
 
@@ -26,6 +26,7 @@ export const SearchMusicWidget = () => {
     concurrency: 5,
     itemTimeout: 10000,
     globalTimeout: 30000,
+    checkWithProxyAfter: 3000
   });
 
   const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist } = useAudioStore();

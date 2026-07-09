@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 
 import type { BaseError } from "@/app/quires/types.ts";
 import type { PlayListItem, AudioTrackData } from "@/app/types.ts";
+import type { DraggableItem } from "@/app/components/dnd/types.ts";
 
 import { EMPTY_LIST, savePlayListToStorage, loadPlayListFromStorage } from "@/app/utils/playlistUtils.ts";
 import {
@@ -16,15 +17,18 @@ import {
 
 
 interface UseGetDataProps{
-  onDelete: (item: AudioTrackData) => void;
+  onDelete?: (item: AudioTrackData) => void;
+  items?: DraggableItem<AudioTrackData>[];
   // onAddTrack: () => void;
 }
 
-export const useGetMusicLibrary = ({ onDelete }: UseGetDataProps) => {
+export const useGetMusicLibrary = ({onDelete}: UseGetDataProps) => {
+
+
 
   return useQuery<MusicPlaylist, AxiosError<BaseError>>({
     enabled: true,
-    queryKey: ["library", {onDelete}],
+    queryKey: ["library-1", {onDelete}],
     queryFn: async () => {
       try {
         const { data } = await getMyMusicLibrary();
