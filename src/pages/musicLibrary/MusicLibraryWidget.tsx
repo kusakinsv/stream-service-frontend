@@ -32,7 +32,7 @@ export const MusicLibraryWidget = () => {
   const { deleteTrack, libraryItems, setLibraryItems } = usePlaylistStore();
   const { isPlaying, currentTrack, setCurrentTrack, togglePlay } = useAudioStore();
 
-  const { data, isLoading} = useGetMusicLibrary({});
+  const { data, isLoading } = useGetMusicLibrary({});
   const { mutate: deleteItem } = useDeleteTrackFromLibrary();
   const { mutate: reOrderPlaylist, data: reordered } = useReOrderPlaylist();
 
@@ -40,7 +40,7 @@ export const MusicLibraryWidget = () => {
     concurrency: 5,
     itemTimeout: 2000,
     globalTimeout: 10000,
-    checkWithProxyAfter: 1500
+    checkWithProxyAfter: 1500,
   });
 
   const handleDeleteItem = (item: AudioTrackData) => {
@@ -79,7 +79,7 @@ export const MusicLibraryWidget = () => {
   //для добавления
   useEffect(() => {
     if (validatedItems.length > libraryItems.length) {
-      setLibraryItems(validatedItems)
+      setLibraryItems(validatedItems);
     }
   }, [validatedItems]);
 
@@ -89,13 +89,13 @@ export const MusicLibraryWidget = () => {
       return (
         <SortableItem
           key={value.url}
-          item={{id: value.url}}
+          item={{ id: value.url }}
           elem={<PlayListTrackItem
             item={value}
             isPlaying={isPlaying}
             currentTrackUrl={currentTrack?.url}
             key={value.url}
-            onClick={() => onItemPlayButtonClickHandler(value, validatedItems)}
+            onClick={() => onItemPlayButtonClickHandler(value, libraryItems)}
             onDeleteClick={() => handleDeleteItem(value)}
           />}
         />
@@ -124,7 +124,7 @@ export const MusicLibraryWidget = () => {
           <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
             {data?.title}
           </Typography>
-          {isLoading || isValidationLoading ? "Loading..." : (
+          {isLoading ? "Loading..." : (
             // <Container maxWidth="md">
             <Box sx={{ py: 1 }}>
 
