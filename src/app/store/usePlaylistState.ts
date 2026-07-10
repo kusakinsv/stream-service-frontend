@@ -18,9 +18,11 @@ export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
     },
     addTrack: (item: AudioTrackData) => {
       const { libraryItems: li } = get();
-      set({
-        libraryItems: [...li, item],
-      });
+      if (!li.some(i=> i.url === item.url)) {
+        set({
+          libraryItems: [...li, item],
+        });
+      }
     },
     deleteTrack: (item: AudioTrackData) => {
       const { libraryItems: li } = get();

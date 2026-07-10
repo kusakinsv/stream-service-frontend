@@ -39,8 +39,6 @@ export const SearchMusicWidget = () => {
     }
   }, [foundTracks.length, setFoundTracks, validatedItems]);
 
-  console.log(foundTracks.length);
-
    const handleSearch = (track: string) => {
     clear();
     setCurrentSearchTrack(track);
@@ -61,16 +59,17 @@ export const SearchMusicWidget = () => {
   };
 
 
-  const trackListFiltered = useMemo(() => {
-      const audioTrackData = validatedItems.filter(item => item.isValid);
-      return audioTrackData;
-    },
-
-    [validatedItems],
-  );
+  // const trackListFiltered = useMemo(() => {
+  //     const audioTrackData = foundTracks.filter(item => item.isValid);
+  //     return audioTrackData;
+  //   },
+  //
+  //   [validatedItems],
+  // );
 
   // const trackList = useMemo(() => mockTracks
   const trackList = useMemo(() => foundTracks
+      .filter(item => item.isValid)
       .map((item) => {
         return (
           <TrackItem
@@ -78,12 +77,12 @@ export const SearchMusicWidget = () => {
             isPlaying={isPlaying}
             currentTrackUrl={currentTrack?.url}
             key={item.url}
-            onPlayClick={() => onItemPlayButtonClickHandler(item, trackListFiltered)}
+            onPlayClick={() => onItemPlayButtonClickHandler(item, foundTracks)}
             onAddClick={() => handleAddTrackToLibrary(item)}
           />
         );
       }),
-    [currentTrack?.url, isPlaying, onItemPlayButtonClickHandler, trackListFiltered, foundTracks],
+    [currentTrack?.url, isPlaying, onItemPlayButtonClickHandler, foundTracks],
   );
 
   return (
@@ -103,10 +102,12 @@ export const SearchMusicWidget = () => {
         <SearchPanel onSearch={handleSearch} />
         <Box sx={{
           overflow: "auto",
-          flex: 1,
+          // flex: 1,
+          maxHeight: "100%",
+          height: "100%",
           minHeight: 0, // критично для корректной работы overflow
         }}>
-          <List sx={{ width: "100%" }}>
+          <List sx={{ width: "100%", }}>
             {isPending ?? isLoading ? "Loading..." : trackList}
           </List>
         </Box>

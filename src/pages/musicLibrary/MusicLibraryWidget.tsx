@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react";
+import { useEffect } from "react";
 import { Box, List, Paper, Stack, Typography } from "@mui/material";
 import {
   arrayMove,
@@ -48,7 +48,6 @@ export const MusicLibraryWidget = () => {
     deleteItem(mapToPlayListItem(item));
   };
 
-
   const onItemPlayButtonClickHandler = (item: AudioTrackData, trackList: AudioTrackData[]) => {
     if (currentTrack?.url !== item.url) {
       setCurrentTrack(item, trackList);
@@ -77,11 +76,11 @@ export const MusicLibraryWidget = () => {
 
   if (reordered) savePlayListToStorage(reordered?.data);
 
-
+  //для добавления
   useEffect(() => {
-    // if (libraryItems.length === 0) {
-      setLibraryItems(validatedItems);
-    // }
+    if (validatedItems.length > libraryItems.length) {
+      setLibraryItems(validatedItems)
+    }
   }, [validatedItems]);
 
   const itemElements = libraryItems
@@ -152,14 +151,8 @@ export const MusicLibraryWidget = () => {
                 </Paper>
               )}
             </Box>
-            // </Container>
           )
           }
-
-
-          {/*<Stack>*/}
-          {/*  {isLoading || isValidationLoading ? "Loading..." : playList}*/}
-          {/*</Stack>*/}
         </Box>
       </Stack>
     </Stack>
