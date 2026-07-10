@@ -8,7 +8,6 @@ export const DesktopBar = () => {
   const navigate = useNavigate();
 
   const handleNavigation = (path: string) => {
-    console.log("path: " + path);
     navigate(path);
   };
 

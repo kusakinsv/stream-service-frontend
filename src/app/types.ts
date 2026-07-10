@@ -4,11 +4,6 @@ export type AudioItem = {
   cors?: boolean;
 }
 
-export type SearchedTrack = {
-  url: string;
-  title?: null | string;
-}
-
 export type MusicTrack = {
   url: string;
   title: string;

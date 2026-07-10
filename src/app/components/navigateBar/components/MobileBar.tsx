@@ -10,7 +10,6 @@ export const MobileBar = ({ children }: PropsWithChildren) => {
   const location = useLocation();
   const theme = useTheme();
   const handleNavigation = (path: string) => {
-    console.log("path: " + path);
     navigate(path);
   };
 

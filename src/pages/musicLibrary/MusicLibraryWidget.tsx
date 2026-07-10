@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useEffect } from "react";
 import { Box, List, Paper, Stack, Typography } from "@mui/material";
 import {
   arrayMove,
@@ -17,10 +17,10 @@ import {
 } from "@dnd-kit/core";
 
 import type { AudioTrackData } from "@/app/types.ts";
-import type { DraggableItem } from "@/app/components/dnd/types.ts";
 
 import { useReOrderPlaylist } from "@/app/quires/usePlaylist.ts";
 import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
+import { usePlaylistStore } from "@/app/store/usePlaylistState.ts";
 import { SortableItem } from "@/app/components/dnd/SortableItem.tsx";
 import { PlayListTrackItem } from "@/pages/musicLibrary/PlayListTrackItem.tsx";
 import { useGetMusicLibrary, useDeleteTrackFromLibrary } from "@/app/quires/useLibrary.ts";
@@ -28,25 +28,13 @@ import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAu
 import { mapToPlayList, mapToPlayListItem, savePlayListToStorage } from "@/app/utils/playlistUtils.ts";
 
 
-
 export const MusicLibraryWidget = () => {
-
-  const [items, setItems] = useState<DraggableItem<AudioTrackData>[]>([]);
-
-
-
-  const { mutate: deleteItem } = useDeleteTrackFromLibrary();
-  const { data, isLoading, refetch } = useGetMusicLibrary({});
-
-  const handleDeleteItem = (item: AudioTrackData) => {
-    setItems((items) => items.filter((i) => i.url !== item.url));
-    deleteItem(mapToPlayListItem(item));
-  };
-
-  const { mutate: reOrderPlaylist, data: reordered } = useReOrderPlaylist();
+  const { deleteTrack, libraryItems, setLibraryItems } = usePlaylistStore();
   const { isPlaying, currentTrack, setCurrentTrack, togglePlay } = useAudioStore();
 
-
+  const { data, isLoading} = useGetMusicLibrary({});
+  const { mutate: deleteItem } = useDeleteTrackFromLibrary();
+  const { mutate: reOrderPlaylist, data: reordered } = useReOrderPlaylist();
 
   const { isLoading: isValidationLoading, validatedItems } = useValidateAudioTracks(data?.positions ?? [], {
     concurrency: 5,
@@ -54,6 +42,12 @@ export const MusicLibraryWidget = () => {
     globalTimeout: 10000,
     checkWithProxyAfter: 1500
   });
+
+  const handleDeleteItem = (item: AudioTrackData) => {
+    deleteTrack(item);
+    deleteItem(mapToPlayListItem(item));
+  };
+
 
   const onItemPlayButtonClickHandler = (item: AudioTrackData, trackList: AudioTrackData[]) => {
     if (currentTrack?.url !== item.url) {
@@ -67,13 +61,13 @@ export const MusicLibraryWidget = () => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = items.findIndex((item) => item.id === active.id);
-      const newIndex = items.findIndex((item) => item.id === over.id);
-      const movedArr = arrayMove(items, oldIndex, newIndex);
+      const oldIndex = libraryItems.findIndex((item) => item.url === active.id);
+      const newIndex = libraryItems.findIndex((item) => item.url === over.id);
+      const movedArr = arrayMove(libraryItems, oldIndex, newIndex);
       for (let i = 0; i < movedArr.length; i++) {
         movedArr[i].position = i + 1;
       }
-      setItems(movedArr);
+      setLibraryItems(movedArr);
       console.log(data !== null && data !== undefined);
       if (data) {
         reOrderPlaylist({ id: data.id, positions: mapToPlayList(movedArr) });
@@ -83,54 +77,20 @@ export const MusicLibraryWidget = () => {
 
   if (reordered) savePlayListToStorage(reordered?.data);
 
-  const draggables: DraggableItem<AudioTrackData>[] = useMemo(() => validatedItems
-    .sort((o1, o2) => (o1.position ?? Infinity) - (o2.position ?? Infinity))
-    .map((value, index) => ({ ...value, id: String(index) })), [validatedItems]);
-
-  // const tracks = useMemo(() => validatedItems
-  //   .sort((o1, o2) => (o1.position ?? Infinity) - (o2.position ?? Infinity))
-  //   .map((value, index) => {
-  //       return (
-  //         <SortableItem
-  //           key={index}
-  //           item={{
-  //               ...value,
-  //               id: String(index),
-  //             }}
-  //           elem={<PlayListTrackItem
-  //             item={value}
-  //             isPlaying={isPlaying}
-  //             currentTrackUrl={currentTrack?.url}
-  //             key={value.url}
-  //             onClick={() => onItemPlayButtonClickHandler(value, validatedItems)}
-  //             onDeleteClick={() => handleDeleteItem(value)}
-  //           />}
-  //           onDelete={handleDelete}
-  //
-  //         />
-  //       );
-  //     },
-  //   ), [validatedItems, isPlaying, deleteItem, currentTrack, setCurrentTrack, togglePlay]);
-
-  // const draggables: DraggableItem<AudioTrackData>[] = useMemo(() => tracks.map((value, index) => ({
-  //   ...value,
-  //   id: String(index),
-  // })), [tracks]);
-
-
-
-
 
   useEffect(() => {
-    setItems(draggables);
-  }, [draggables]);
+    // if (libraryItems.length === 0) {
+      setLibraryItems(validatedItems);
+    // }
+  }, [validatedItems]);
 
-  const itemElements = items
+  const itemElements = libraryItems
+    .sort((o1, o2) => (o1.position ?? Infinity) - (o2.position ?? Infinity))
     .map((value) => {
       return (
         <SortableItem
-          key={value.id}
-          item={value}
+          key={value.url}
+          item={{id: value.url}}
           elem={<PlayListTrackItem
             item={value}
             isPlaying={isPlaying}
@@ -175,7 +135,7 @@ export const MusicLibraryWidget = () => {
                 onDragEnd={handleDragEnd}
               >
                 <SortableContext
-                  items={items.map((item) => item.id)}
+                  items={libraryItems.map((item) => item.url)}
                   strategy={verticalListSortingStrategy}
                 >
                   <List sx={{ p: 0 }}>
@@ -184,7 +144,7 @@ export const MusicLibraryWidget = () => {
                 </SortableContext>
               </DndContext>
 
-              {items.length === 0 && (
+              {libraryItems.length === 0 && (
                 <Paper sx={{ p: 4, textAlign: "center" }}>
                   <Typography color="text.secondary">
                     {"Список пуст. Добавьте музыку из раздела \"Поиск музыки\""}

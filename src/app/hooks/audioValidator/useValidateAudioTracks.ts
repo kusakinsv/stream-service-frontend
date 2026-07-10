@@ -118,8 +118,8 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
         };
 
         const handleSuccess = () => {
-          const url = item.url
-          console.log(item.title + " : " + url);
+          // const url = item.url
+          // console.log(item.title + " : " + url);
           clearTimeout(timeoutId);
           clearTimeout(quickTimeout);
           itemTimeoutsRef.current.delete(timeoutId);
@@ -291,6 +291,7 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
 function createValidResult<T extends AudioItem>(item: T, audio: HTMLAudioElement, isNeedProxy: boolean): AudioTrackData {
   const result = {
     ...item,
+    id: "0",
     isValid: true,
     audioElem: audio,
     duration: audio.duration,
@@ -306,6 +307,7 @@ function createValidResult<T extends AudioItem>(item: T, audio: HTMLAudioElement
 function createInvalidResult<T extends AudioItem>(item: T): AudioTrackData {
   const result = {
     ...item,
+    id: "0",
     duration: null,
     isValid: false,
     audioElem: null,

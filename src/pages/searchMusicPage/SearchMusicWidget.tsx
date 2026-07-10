@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { Box, List, Stack } from "@mui/material";
 
 import type { AudioTrackData } from "@/app/types.ts";
@@ -7,6 +7,8 @@ import { removeDuplicates } from "@/app/utils/utils.ts";
 import { mapToPlayListItem } from "@/app/utils/playlistUtils.ts";
 import { useAddTrackToLibrary } from "@/app/quires/useLibrary.ts";
 import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
+import { usePlaylistStore } from "@/app/store/usePlaylistState.ts";
+import { useSearchStore } from "@/app/store/useMusicSearchtState.ts";
 import { SearchPanel } from "@/pages/searchMusicPage/SearchPanel.tsx";
 import { useSearchMusicTracks } from "@/app/quires/useSearchMusicTracks.ts";
 import { TrackItem } from "@/pages/searchMusicPage/components/trackItem/TrackItem.tsx";
@@ -14,24 +16,34 @@ import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAu
 
 
 export const SearchMusicWidget = () => {
+  const { isPlaying, currentTrack, setCurrentTrack, togglePlay } = useAudioStore();
+  const {setCurrentSearchTrack,  foundTracks,  setFoundTracks, clear } = useSearchStore();
+  const { addTrack } = usePlaylistStore();
 
   const { data, isPending, mutate } = useSearchMusicTracks();
 
   const { mutate: addTrackToLibrary } = useAddTrackToLibrary();
-
-  const searchedTracks = data?.data ?? [];
-  const distinct = useMemo(() => removeDuplicates(searchedTracks), [searchedTracks]);
+  
+  const distinct = useMemo(() => removeDuplicates(data?.data ?? []), [data]);
 
   const { isLoading, validatedItems } = useValidateAudioTracks(distinct, {
     concurrency: 5,
     itemTimeout: 10000,
     globalTimeout: 30000,
-    checkWithProxyAfter: 3000
+    checkWithProxyAfter: 3000,
   });
 
-  const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist } = useAudioStore();
+  useEffect(() => {
+    if (validatedItems.length > foundTracks.length) {
+      setFoundTracks(validatedItems)
+    }
+  }, [foundTracks.length, setFoundTracks, validatedItems]);
 
-  const handleSearch = (track: string) => {
+  console.log(foundTracks.length);
+
+   const handleSearch = (track: string) => {
+    clear();
+    setCurrentSearchTrack(track);
     mutate(track);
   };
 
@@ -44,13 +56,13 @@ export const SearchMusicWidget = () => {
   };
 
   const handleAddTrackToLibrary = (item: AudioTrackData) => {
+    addTrack(item);
     addTrackToLibrary(mapToPlayListItem(item));
   };
 
 
   const trackListFiltered = useMemo(() => {
       const audioTrackData = validatedItems.filter(item => item.isValid);
-      setCurrentPlaylist(audioTrackData);
       return audioTrackData;
     },
 
@@ -58,7 +70,7 @@ export const SearchMusicWidget = () => {
   );
 
   // const trackList = useMemo(() => mockTracks
-  const trackList = useMemo(() => trackListFiltered
+  const trackList = useMemo(() => foundTracks
       .map((item) => {
         return (
           <TrackItem
@@ -71,7 +83,7 @@ export const SearchMusicWidget = () => {
           />
         );
       }),
-    [currentTrack?.url, isPlaying, onItemPlayButtonClickHandler, trackListFiltered],
+    [currentTrack?.url, isPlaying, onItemPlayButtonClickHandler, trackListFiltered, foundTracks],
   );
 
   return (
@@ -82,8 +94,8 @@ export const SearchMusicWidget = () => {
       // overflow: 'hidden', // важно! предотвращаем скролл всего стека
     }}>
       <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
+        display: "flex",
+        flexDirection: "column",
         minHeight: 0, // важно для flex-сжатия
         flexGrow: 1,
 
@@ -91,12 +103,12 @@ export const SearchMusicWidget = () => {
         <SearchPanel onSearch={handleSearch} />
         <Box sx={{
           overflow: "auto",
-            flex: 1,
-            minHeight: 0, // критично для корректной работы overflow
-          }}>
-            <List sx={{ width: '100%'}}>
-              {isPending ?? isLoading ? "Loading..." : trackList}
-            </List>
+          flex: 1,
+          minHeight: 0, // критично для корректной работы overflow
+        }}>
+          <List sx={{ width: "100%" }}>
+            {isPending ?? isLoading ? "Loading..." : trackList}
+          </List>
         </Box>
       </Box>
 

@@ -9,7 +9,7 @@ interface PlaylistState {
   deleteTrack: (item: AudioTrackData) => void;
 }
 
-export const usePlayListStore = create<PlaylistState>()((set, get) => ({
+export const usePlaylistStore = create<PlaylistState>()((set, get) => ({
     libraryItems: [],
     setLibraryItems: items => {
       set({

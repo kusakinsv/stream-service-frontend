@@ -1,8 +1,8 @@
-import { useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import { Stack, Button, TextField, InputAdornment } from "@mui/material";
 
 import { getColors } from "@/app/theme/colors.ts";
+import { useSearchStore } from "@/app/store/useMusicSearchtState.ts";
 import { SearchPanelStyled } from "@/pages/searchMusicPage/SearchPanel.styled.ts";
 
 interface SearchPanelProps {
@@ -10,23 +10,22 @@ interface SearchPanelProps {
 }
 
 export const SearchPanel = ({onSearch}: SearchPanelProps) => {
-  // const {setCurrentSearchTrack } = useSearchStore();
-  const [searchValue, setSearchValue] = useState<string>("");
+  const { currentSearchTrack, setCurrentSearchTrack} = useSearchStore();
 
   const handleSearchClick = () => {
-    // setCurrentSearchTrack(searchValue);
-    onSearch(searchValue);
+    onSearch(currentSearchTrack);
   };
 
+  // console.log(currentSearchTrack);
   const handleChangeTextField = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(event.target.value);
+    setCurrentSearchTrack(event.target.value);
   };
 
   return (
     <SearchPanelStyled>
       <Stack spacing={2} direction="row" sx={{ display: "flex", justifyContent: "space-around" }}>
         <TextField
-          value={searchValue}
+          value={currentSearchTrack}
           onChange={handleChangeTextField} fullWidth={true}
           sx={{
             maxWidth: "90%",
