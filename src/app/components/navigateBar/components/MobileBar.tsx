@@ -30,7 +30,7 @@ export const MobileBar = ({ children }: PropsWithChildren) => {
         // bottom: 0,
         // left: 0,
         // right: 0,
-        zIndex: theme.zIndex.appBar,
+        // zIndex: theme.zIndex.appBar,
         // display: { xs: "block", md: "none" },
       }}
       elevation={3}

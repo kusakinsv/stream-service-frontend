@@ -59,7 +59,7 @@ export const SearchMusicWidget = () => {
   };
 
   const trackList = useMemo(() => foundTracks
-      .filter(item => item.isValid)
+      // .filter(item => item.isValid)
       .map((item) => {
         return (
           <TrackItem
@@ -76,34 +76,20 @@ export const SearchMusicWidget = () => {
   );
 
   return (
-    // <Stack sx={{
-    //   height: "100%",
-    //   maxHeight: "93vh",
-    //   justifyContent: "space-between",
-    //   display: "flex",
-    //   // flexGrow: 1,
-    //   flex: "1 1 100px"
-    //   // overflow: 'hidden', // важно! предотвращаем скролл всего стека
-    // }}>
-      <Box sx={{
-
-        // display: "flex",
-        // flexDirection: "column",
-        // minHeight: 0, // важно для flex-сжатия
-        height: "400px"
-        // flex: "0 1 100px"
-        // // maxHeight: "800px",
-      }}>
-        <SearchPanel onSearch={handleSearch} />
+    <Box id="search-widget-box" sx={{
+      // overflow: "auto",
+      height: "100%",
+    }}>
+      <SearchPanel onSearch={handleSearch} />
 
           <List sx={{
             width: "100%",
             flexGrow: 1,
             minHeight: 0
           }}>
+
             {isPending ?? isLoading ? "Loading..." : trackList}
           </List>
-
-      </Box>
-  );
+    </Box>
+);
 };

@@ -44,14 +44,15 @@ export const MusicPlayerControlsWidget = () => {
   };
 
   return (
-    <Box sx={{
-      height: "25vh",
-      backgroundColor: "#222222",
-      flexShrink: 0,
-      margin: "0 auto",
-      maxWidth: "1200px",
-      width: "100%"
-    }}>
+    <Box id="controls"
+         sx={{
+           height: "27vh",
+           backgroundColor: "#222222",
+           flexShrink: 0,
+           margin: "0 auto",
+           maxWidth: "1200px",
+           width: "100%",
+         }}>
       <Stack spacing={1}>
         <Stack>
           <AudioProgress
@@ -74,7 +75,7 @@ export const MusicPlayerControlsWidget = () => {
 
           <SkipNextRoundedIcon sx={sxIconsArrow} onClick={onNextHandler} />
         </Stack>
-        <VolumeControl/>
+        <VolumeControl />
       </Stack>
     </Box>
   );

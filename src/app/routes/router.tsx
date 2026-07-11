@@ -1,4 +1,3 @@
-import { Container } from "@mui/material";
 import { Route, Routes, Navigate, BrowserRouter, createHashRouter } from "react-router";
 
 import { PATHS } from "@/app/routes/paths.ts";

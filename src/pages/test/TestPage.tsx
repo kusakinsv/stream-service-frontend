@@ -1,12 +1,12 @@
 import { TestWidget } from "@/pages/test/TestWidget.tsx";
-import { Content } from "@/app/components/container/ContentContainer.tsx";
+import { ContentStyled } from "@/app/components/container/ContentContainer.tsx";
 
 export const TestPage = () => {
   return (
     <>
-      <Content>
+      <ContentStyled>
         <TestWidget />
-      </Content>
+      </ContentStyled>
     </>
   );
 };

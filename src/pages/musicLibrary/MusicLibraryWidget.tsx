@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Box, List, Paper, Stack, Typography } from "@mui/material";
+import { List, Paper, Typography } from "@mui/material";
 import {
   arrayMove,
   SortableContext,
@@ -36,7 +36,7 @@ export const MusicLibraryWidget = () => {
   const { mutate: deleteItem } = useDeleteTrackFromLibrary();
   const { mutate: reOrderPlaylist, data: reordered } = useReOrderPlaylist();
 
-  const { isLoading: isValidation, validatedItems } = useValidateAudioTracks(data?.positions ?? [], {
+  const {validatedItems } = useValidateAudioTracks(data?.positions ?? [], {
     concurrency: 5,
     itemTimeout: 2000,
     globalTimeout: 10000,
@@ -130,12 +130,11 @@ export const MusicLibraryWidget = () => {
               items={libraryItems.map((item) => item.url)}
               strategy={verticalListSortingStrategy}
             >
-              {/*<List sx={{*/}
-              {/*  flexGrow: 1,*/}
-              {/*  minHeight: 0,*/}
-              {/*}}>*/}
-                {itemElements}
-              {/*</List>*/}
+
+                  <List>
+                    {itemElements}
+                  </List>
+
             </SortableContext>
           </DndContext>
 
