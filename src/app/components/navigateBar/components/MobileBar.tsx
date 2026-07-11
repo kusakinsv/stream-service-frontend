@@ -20,16 +20,6 @@ export const MobileBar = ({ children }: PropsWithChildren) => {
   return (
     <>
     <AppBar position="sticky" color="primary" elevation={2} sx={{ display: { xs: "flex", md: "none" } }}>
-      {/*<Toolbar>*/}
-      {/*  <Typography*/}
-      {/*    variant="h6"*/}
-      {/*    component="div"*/}
-      {/*    sx={{ flexGrow: 1, fontWeight: 700, cursor: "pointer" }}*/}
-      {/*    onClick={() => handleNavigation("/")}*/}
-      {/*  >*/}
-      {/*    MyApp*/}
-      {/*  </Typography>*/}
-      {/*</Toolbar>*/}
     </AppBar>
     {children}
 

@@ -22,7 +22,9 @@ export const NavBar  = ({ children }: PropsWithChildren) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   if (isMobile) {
-    return <MobileBar>{children}</MobileBar>
+    return <MobileBar>
+      {children}
+    </MobileBar>
   }
 
   return (

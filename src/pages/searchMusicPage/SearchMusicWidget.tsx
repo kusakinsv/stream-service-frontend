@@ -1,5 +1,5 @@
+import { Box, List } from "@mui/material";
 import { useMemo, useEffect } from "react";
-import { Box, List, Stack } from "@mui/material";
 
 import type { AudioTrackData } from "@/app/types.ts";
 
@@ -58,16 +58,6 @@ export const SearchMusicWidget = () => {
     addTrackToLibrary(mapToPlayListItem(item));
   };
 
-
-  // const trackListFiltered = useMemo(() => {
-  //     const audioTrackData = foundTracks.filter(item => item.isValid);
-  //     return audioTrackData;
-  //   },
-  //
-  //   [validatedItems],
-  // );
-
-  // const trackList = useMemo(() => mockTracks
   const trackList = useMemo(() => foundTracks
       .filter(item => item.isValid)
       .map((item) => {
@@ -86,36 +76,34 @@ export const SearchMusicWidget = () => {
   );
 
   return (
-    <Stack sx={{
-      height: "100%",
-      maxHeight: "93vh",
-      justifyContent: "space-between",
-      // overflow: 'hidden', // важно! предотвращаем скролл всего стека
-    }}>
+    // <Stack sx={{
+    //   height: "100%",
+    //   maxHeight: "93vh",
+    //   justifyContent: "space-between",
+    //   display: "flex",
+    //   // flexGrow: 1,
+    //   flex: "1 1 100px"
+    //   // overflow: 'hidden', // важно! предотвращаем скролл всего стека
+    // }}>
       <Box sx={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: 0, // важно для flex-сжатия
-        flexGrow: 1,
 
+        // display: "flex",
+        // flexDirection: "column",
+        // minHeight: 0, // важно для flex-сжатия
+        height: "400px"
+        // flex: "0 1 100px"
+        // // maxHeight: "800px",
       }}>
         <SearchPanel onSearch={handleSearch} />
-        <Box sx={{
-          overflow: "auto",
-          // flex: 1,
-          maxHeight: "100%",
-          height: "100%",
-          minHeight: 0, // критично для корректной работы overflow
-        }}>
-          <List sx={{ width: "100%", }}>
+
+          <List sx={{
+            width: "100%",
+            flexGrow: 1,
+            minHeight: 0
+          }}>
             {isPending ?? isLoading ? "Loading..." : trackList}
           </List>
-        </Box>
+
       </Box>
-
-      {/*todo вынести в область навигации*/}
-      {/*<MusicPlayerControlsWidget />*/}
-
-    </Stack>
   );
 };

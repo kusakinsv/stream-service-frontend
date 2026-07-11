@@ -36,7 +36,7 @@ export const MusicLibraryWidget = () => {
   const { mutate: deleteItem } = useDeleteTrackFromLibrary();
   const { mutate: reOrderPlaylist, data: reordered } = useReOrderPlaylist();
 
-  const { isLoading: isValidationLoading, validatedItems } = useValidateAudioTracks(data?.positions ?? [], {
+  const { isLoading: isValidation, validatedItems } = useValidateAudioTracks(data?.positions ?? [], {
     concurrency: 5,
     itemTimeout: 2000,
     globalTimeout: 10000,
@@ -115,46 +115,39 @@ export const MusicLibraryWidget = () => {
   );
 
   return (
-    <Stack sx={{
-      height: "100%",
-      justifyContent: "space-between",
-    }}>
-      <Stack spacing={1} useFlexGap={true}>
-        <Box>
-          <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
-            {data?.title}
-          </Typography>
-          {isLoading ? "Loading..." : (
-            // <Container maxWidth="md">
-            <Box sx={{ py: 1 }}>
+    <>
+      <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
+        {data?.title}
+      </Typography>
+      {isLoading ? "Loading..." : (
+        <>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={libraryItems.map((item) => item.url)}
+              strategy={verticalListSortingStrategy}
+            >
+              {/*<List sx={{*/}
+              {/*  flexGrow: 1,*/}
+              {/*  minHeight: 0,*/}
+              {/*}}>*/}
+                {itemElements}
+              {/*</List>*/}
+            </SortableContext>
+          </DndContext>
 
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={libraryItems.map((item) => item.url)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <List sx={{ p: 0 }}>
-                    {itemElements}
-                  </List>
-                </SortableContext>
-              </DndContext>
-
-              {libraryItems.length === 0 && (
-                <Paper sx={{ p: 4, textAlign: "center" }}>
-                  <Typography color="text.secondary">
-                    {"Список пуст. Добавьте музыку из раздела \"Поиск музыки\""}
-                  </Typography>
-                </Paper>
-              )}
-            </Box>
-          )
-          }
-        </Box>
-      </Stack>
-    </Stack>
+          {libraryItems.length === 0 && (
+            <Paper sx={{ p: 4, textAlign: "center" }}>
+              <Typography color="text.secondary">
+                {"Список пуст. Добавьте музыку из раздела \"Поиск музыки\""}
+              </Typography>
+            </Paper>
+          )}
+        </>)
+      }
+    </>
   );
 };
