@@ -25,7 +25,7 @@ export const VolumeControl = () => {
       width: "100%",
       padding: {
         md: "0 5rem",
-        xs: "0 2.5rem",
+        xs: "0 2.5rem 0 2.5rem",
       },
     }}>
       <Box sx={{

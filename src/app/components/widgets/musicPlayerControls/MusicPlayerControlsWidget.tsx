@@ -6,8 +6,8 @@ import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
 import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
 
 import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
-import { AudioProgress } from "@/app/components/widgets/AudioProgress.tsx";
-import { VolumeControl } from "@/app/components/widgets/VolumeControl.tsx";
+import { AudioProgress } from "@/app/components/widgets/musicPlayerControls/components/AudioProgress.tsx";
+import { VolumeControl } from "@/app/components/widgets/musicPlayerControls/components/VolumeControl.tsx";
 
 const sxIconsArrow = {
   fontSize: "3rem",
@@ -62,6 +62,7 @@ export const MusicPlayerControlsWidget = () => {
           />
         </Stack>
         <Box>{state.currentTrack?.title ?? "-"}</Box>
+
         <Stack spacing={2} direction={"row"} sx={{
           alignItems: "center",
           justifyContent: "center",
@@ -75,6 +76,7 @@ export const MusicPlayerControlsWidget = () => {
 
           <SkipNextRoundedIcon sx={sxIconsArrow} onClick={onNextHandler} />
         </Stack>
+
         <VolumeControl />
       </Stack>
     </Box>

@@ -24,17 +24,17 @@ export const MobileBar = ({ children }: PropsWithChildren) => {
     {children}
 
 
-    <Paper
-      sx={{
-        // position: "fixed",
-        // bottom: 0,
-        // left: 0,
-        // right: 0,
-        // zIndex: theme.zIndex.appBar,
-        // display: { xs: "block", md: "none" },
-      }}
-      elevation={3}
-    >
+    {/*<Paper*/}
+    {/*  sx={{*/}
+    {/*    // position: "fixed",*/}
+    {/*    // bottom: 0,*/}
+    {/*    // left: 0,*/}
+    {/*    // right: 0,*/}
+    {/*    // zIndex: theme.zIndex.appBar,*/}
+    {/*    // display: { xs: "block", md: "none" },*/}
+    {/*  }}*/}
+    {/*  elevation={3}*/}
+    {/*>*/}
       <BottomNavigation
         value={activeIndex !== -1 ? activeIndex : 0}
         onChange={(_, newValue) => {
@@ -42,10 +42,11 @@ export const MobileBar = ({ children }: PropsWithChildren) => {
         }}
         showLabels
         sx={{
-          height: 65,
+          // marginTop: 12,
+          height: 45,
           "& .MuiBottomNavigationAction-root": {
             minWidth: "auto",
-            padding: "6px 12px",
+            // padding: "6px 12px",
           },
         }}
       >
@@ -64,7 +65,7 @@ export const MobileBar = ({ children }: PropsWithChildren) => {
         ))}
       </BottomNavigation>
 
-    </Paper>
+    {/*</Paper>*/}
   </>
   );
 };

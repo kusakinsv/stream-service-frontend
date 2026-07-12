@@ -7,7 +7,7 @@ import { NavBar } from "@/app/components/navigateBar/NavBar.tsx";
 import { Content } from "@/app/components/container/ContentContainer.tsx";
 import { MusicLibraryPage } from "@/pages/musicLibrary/MusicLibraryPage.tsx";
 import { SearchMusicPage } from "@/pages/searchMusicPage/SearchMusicPage.tsx";
-import { MusicPlayerControlsWidget } from "@/app/components/widgets/MusicPlayerControlsWidget.tsx";
+import { MusicPlayerControlsWidget } from "@/app/components/widgets/musicPlayerControls/MusicPlayerControlsWidget.tsx";
 
 
 const routes = [
