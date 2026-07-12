@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from "react";
 
 import { useLocation, useNavigate } from "react-router";
-import { Paper, AppBar, useTheme, BottomNavigation, BottomNavigationAction } from "@mui/material";
+import { AppBar, useTheme, BottomNavigation, BottomNavigationAction } from "@mui/material";
 
 import { navItems } from "@/app/components/navigateBar/NavBar.tsx";
 

@@ -30,7 +30,7 @@ import { mapToPlayList, mapToPlayListItem, savePlayListToStorage } from "@/app/u
 
 export const MusicLibraryWidget = () => {
   const { deleteTrack, libraryItems, setLibraryItems } = usePlaylistStore();
-  const { isPlaying, currentTrack, setCurrentTrack, togglePlay } = useAudioStore();
+  const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist} = useAudioStore();
 
   const { data, isLoading } = useGetMusicLibrary({});
   const { mutate: deleteItem } = useDeleteTrackFromLibrary();
@@ -68,6 +68,7 @@ export const MusicLibraryWidget = () => {
       }
       setLibraryItems(movedArr);
       console.log(data !== null && data !== undefined);
+      setCurrentPlaylist(movedArr);
       if (data) {
         reOrderPlaylist({ id: data.id, positions: mapToPlayList(movedArr) });
       }

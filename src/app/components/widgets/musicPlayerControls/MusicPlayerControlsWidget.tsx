@@ -2,9 +2,9 @@ import React from "react";
 import { Box, Stack } from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import ShuffleRoundedIcon from '@mui/icons-material/ShuffleRounded';
+import ShuffleRoundedIcon from "@mui/icons-material/ShuffleRounded";
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
-import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded';
+import AutorenewRoundedIcon from "@mui/icons-material/AutorenewRounded";
 import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
 
 import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
@@ -26,6 +26,11 @@ export const MusicPlayerControlsWidget = () => {
 
   const onNextHandler = () => {
     state.next();
+  };
+
+  const handleShuffleClick = () => {
+    state.toggleShuffle();
+
   };
 
   const timerRef = React.useRef(0);
@@ -82,7 +87,12 @@ export const MusicPlayerControlsWidget = () => {
 
           <SkipNextRoundedIcon sx={sxIconsArrow} onClick={onNextHandler} />
         </Stack>
-          <ShuffleRoundedIcon fontSize="large"/>
+          <ShuffleRoundedIcon
+            cursor={"pointer"}
+            color={state.isShuffle ? "action" : "disabled"}
+            fontSize="large"
+            onClick={handleShuffleClick}
+          />
         </Stack>
 
         <VolumeControl />
