@@ -128,7 +128,7 @@ export const useAudioStore = create<AudioPlayerState>()(
     },
 
     setVolume: (volume) => {
-      const { audioRef } = get();
+      const { audioRef} = get();
       const refVolume = Math.max(0, Math.min(1, volume/100));
       if (audioRef) audioRef.volume = refVolume;
       set({ volume: volume });
@@ -138,12 +138,17 @@ export const useAudioStore = create<AudioPlayerState>()(
     },
 
     handleTrackEnd: () => {
-      set({
-        isPlaying: false,
-        currentTime: 0,
-      });
-      console.log("конец воспроизведения");
-      // Здесь добавить логику для следующего трека
+      const {next, currentPlaylist, currentTrack} = get();
+      const index = currentPlaylist.findIndex(item => item.url === currentTrack.url)
+      if (index != currentPlaylist.length-1) {
+        next();
+      }
+      else {
+        set({
+          isPlaying: false,
+          currentTime: 0,
+        });
+      }
     },
 
     reset: () => {
