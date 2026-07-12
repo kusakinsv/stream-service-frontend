@@ -2,7 +2,9 @@ import React from "react";
 import { Box, Stack } from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ShuffleRoundedIcon from '@mui/icons-material/ShuffleRounded';
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
+import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded';
 import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
 
 import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
@@ -62,11 +64,15 @@ export const MusicPlayerControlsWidget = () => {
           />
         </Stack>
         <Box>{state.currentTrack?.title ?? "-"}</Box>
-
+        <Stack direction={"row"} sx={{
+          alignItems: "center",
+          justifyContent: "space-around",
+          pb: 2,
+        }}>
+          <AutorenewRoundedIcon fontSize="large"/>
         <Stack spacing={2} direction={"row"} sx={{
           alignItems: "center",
           justifyContent: "center",
-          pb: 5,
         }}>
           <SkipPreviousRoundedIcon sx={sxIconsArrow} onClick={handleClickPrev}
                                    onDoubleClick={handleDoubleClickPrev} />
@@ -75,6 +81,8 @@ export const MusicPlayerControlsWidget = () => {
             : <PlayArrowIcon sx={sxIconsPlayPause} onClick={() => state.play()} />}
 
           <SkipNextRoundedIcon sx={sxIconsArrow} onClick={onNextHandler} />
+        </Stack>
+          <ShuffleRoundedIcon fontSize="large"/>
         </Stack>
 
         <VolumeControl />
