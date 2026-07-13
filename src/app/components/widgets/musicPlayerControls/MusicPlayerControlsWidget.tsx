@@ -1,13 +1,13 @@
 import React from "react";
-import { Box, Stack } from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
+import { Box, Stack, useTheme } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ShuffleRoundedIcon from "@mui/icons-material/ShuffleRounded";
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
-import AutorenewRoundedIcon from "@mui/icons-material/AutorenewRounded";
 import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
 
-import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
+import { RepeatIcon } from "@/app/components/icons/RepeatIcon.tsx";
+import { RepeatType, useAudioStore } from "@/app/store/useAudioPlayerState.ts";
 import { AudioProgress } from "@/app/components/widgets/musicPlayerControls/components/AudioProgress.tsx";
 import { VolumeControl } from "@/app/components/widgets/musicPlayerControls/components/VolumeControl.tsx";
 
@@ -23,6 +23,9 @@ const sxIconsPlayPause = {
 
 export const MusicPlayerControlsWidget = () => {
   const state = useAudioStore();
+  const theme = useTheme();
+  const activeColor = theme.palette.action.active;
+  const disabledColor = theme.palette.action.disabled;
 
   const onNextHandler = () => {
     state.next();
@@ -30,7 +33,10 @@ export const MusicPlayerControlsWidget = () => {
 
   const handleShuffleClick = () => {
     state.toggleShuffle();
+  };
 
+  const handleRepeatClick = () => {
+    state.toggleRepeat();
   };
 
   const timerRef = React.useRef(0);
@@ -74,19 +80,22 @@ export const MusicPlayerControlsWidget = () => {
           justifyContent: "space-around",
           pb: 2,
         }}>
-          <AutorenewRoundedIcon fontSize="large"/>
-        <Stack spacing={2} direction={"row"} sx={{
-          alignItems: "center",
-          justifyContent: "center",
-        }}>
-          <SkipPreviousRoundedIcon sx={sxIconsArrow} onClick={handleClickPrev}
-                                   onDoubleClick={handleDoubleClickPrev} />
-          {state.isPlaying
-            ? <PauseIcon sx={sxIconsPlayPause} onClick={() => state.pause()} />
-            : <PlayArrowIcon sx={sxIconsPlayPause} onClick={() => state.play()} />}
+          <Box sx={{ cursor: "pointer" }} onClick={handleRepeatClick}>
+            <RepeatIcon color={state.repeatType !== RepeatType.NONE ? activeColor : disabledColor}
+                        single={state.repeatType === RepeatType.SINGLE} />
+          </Box>
+          <Stack spacing={2} direction={"row"} sx={{
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <SkipPreviousRoundedIcon sx={sxIconsArrow} onClick={handleClickPrev}
+                                     onDoubleClick={handleDoubleClickPrev} />
+            {state.isPlaying
+              ? <PauseIcon sx={sxIconsPlayPause} onClick={() => state.pause()} />
+              : <PlayArrowIcon sx={sxIconsPlayPause} onClick={() => state.play()} />}
 
-          <SkipNextRoundedIcon sx={sxIconsArrow} onClick={onNextHandler} />
-        </Stack>
+            <SkipNextRoundedIcon sx={sxIconsArrow} onClick={onNextHandler} />
+          </Stack>
           <ShuffleRoundedIcon
             cursor={"pointer"}
             color={state.isShuffle ? "action" : "disabled"}
