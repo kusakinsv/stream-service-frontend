@@ -22,6 +22,8 @@ interface UseGetDataProps{
   // onAddTrack: () => void;
 }
 
+export const STORAGE_KEY = "library";
+
 export const useGetMusicLibrary = ({onDelete}: UseGetDataProps) => {
 
 
@@ -35,11 +37,11 @@ export const useGetMusicLibrary = ({onDelete}: UseGetDataProps) => {
         const hasData = data?.positions?.length > 0;
 
         if (hasData) {
-          savePlayListToStorage(data);
+          savePlayListToStorage(STORAGE_KEY, data);
           return data;
         }
 
-        const cached = loadPlayListFromStorage();
+        const cached = loadPlayListFromStorage(STORAGE_KEY);
         if (cached?.positions?.length > 0) {
           return cached;
         }
@@ -47,7 +49,7 @@ export const useGetMusicLibrary = ({onDelete}: UseGetDataProps) => {
         return EMPTY_LIST
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        const cached = loadPlayListFromStorage();
+        const cached = loadPlayListFromStorage(STORAGE_KEY);
         if (cached?.positions?.length > 0) {
           return cached;
         }

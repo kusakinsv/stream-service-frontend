@@ -19,17 +19,22 @@ import {
 import type { AudioTrackData } from "@/app/types.ts";
 
 import { useReOrderPlaylist } from "@/app/quires/usePlaylist.ts";
+import { useLibraryStore } from "@/app/store/usePlaylistState.ts";
 import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
-import { usePlaylistStore } from "@/app/store/usePlaylistState.ts";
 import { SortableItem } from "@/app/components/dnd/SortableItem.tsx";
 import { PlayListTrackItem } from "@/pages/musicLibrary/PlayListTrackItem.tsx";
 import { useGetMusicLibrary, useDeleteTrackFromLibrary } from "@/app/quires/useLibrary.ts";
 import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAudioTracks.ts";
-import { mapToPlayList, mapToPlayListItem, savePlayListToStorage } from "@/app/utils/playlistUtils.ts";
+import {
+  mapToPlayList,
+  mapToPlayListItem,
+  savePlayListToStorage,
+  updatePlayListInStorage,
+} from "@/app/utils/playlistUtils.ts";
 
 
 export const MusicLibraryWidget = () => {
-  const { deleteTrack, libraryItems, setLibraryItems } = usePlaylistStore();
+  const { deleteTrack, libraryItems, setLibraryItems } = useLibraryStore();
   const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist} = useAudioStore();
 
   const { data, isLoading } = useGetMusicLibrary({});
@@ -45,6 +50,7 @@ export const MusicLibraryWidget = () => {
 
   const handleDeleteItem = (item: AudioTrackData) => {
     deleteTrack(item);
+    updatePlayListInStorage("library", libraryItems)
     deleteItem(mapToPlayListItem(item));
   };
 
@@ -67,7 +73,6 @@ export const MusicLibraryWidget = () => {
         movedArr[i].position = i + 1;
       }
       setLibraryItems(movedArr);
-      console.log(data !== null && data !== undefined);
       setCurrentPlaylist(movedArr);
       if (data) {
         reOrderPlaylist({ id: data.id, positions: mapToPlayList(movedArr) });
@@ -75,7 +80,7 @@ export const MusicLibraryWidget = () => {
     }
   };
 
-  if (reordered) savePlayListToStorage(reordered?.data);
+  if (reordered) savePlayListToStorage("library", reordered?.data);
 
   //для добавления
   useEffect(() => {

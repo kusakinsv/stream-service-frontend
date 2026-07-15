@@ -4,21 +4,21 @@ import { useMemo, useEffect } from "react";
 import type { AudioTrackData } from "@/app/types.ts";
 
 import { removeDuplicates } from "@/app/utils/utils.ts";
-import { mapToPlayListItem } from "@/app/utils/playlistUtils.ts";
 import { useAddTrackToLibrary } from "@/app/quires/useLibrary.ts";
+import { useLibraryStore } from "@/app/store/usePlaylistState.ts";
 import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
-import { usePlaylistStore } from "@/app/store/usePlaylistState.ts";
 import { useSearchStore } from "@/app/store/useMusicSearchtState.ts";
 import { SearchPanel } from "@/pages/searchMusicPage/SearchPanel.tsx";
 import { useSearchMusicTracks } from "@/app/quires/useSearchMusicTracks.ts";
 import { TrackItem } from "@/pages/searchMusicPage/components/trackItem/TrackItem.tsx";
+import { mapToPlayListItem, updatePlayListInStorage } from "@/app/utils/playlistUtils.ts";
 import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAudioTracks.ts";
 
 
 export const SearchMusicWidget = () => {
   const { isPlaying, currentTrack, setCurrentTrack, togglePlay } = useAudioStore();
   const {setCurrentSearchTrack,  foundTracks,  setFoundTracks, clear } = useSearchStore();
-  const { addTrack } = usePlaylistStore();
+  const { addTrack, libraryItems } = useLibraryStore();
 
   const { data, isPending, mutate } = useSearchMusicTracks();
 
@@ -55,8 +55,11 @@ export const SearchMusicWidget = () => {
 
   const handleAddTrackToLibrary = (item: AudioTrackData) => {
     addTrack(item);
+    // updatePlayListInStorage("library", libraryItems)
     addTrackToLibrary(mapToPlayListItem(item));
   };
+
+  updatePlayListInStorage("library", libraryItems)
 
   const trackList = useMemo(() => foundTracks
       // .filter(item => item.isValid)

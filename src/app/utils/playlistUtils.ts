@@ -1,8 +1,6 @@
 import type { MusicPlaylist } from "@/app/quires/libraryQuires.ts";
 import type { PlayListItem, AudioTrackData } from "@/app/types.ts";
 
-export const STORAGE_KEY = "library";
-
 export const EMPTY_LIST = {
   id: -1,
   title: undefined,
@@ -10,18 +8,33 @@ export const EMPTY_LIST = {
 } as MusicPlaylist;
 
 //todo перепилить чтоб забирать лист по id
-export const savePlayListToStorage = (data: MusicPlaylist) => {
+export const savePlayListToStorage = (key: string, data: MusicPlaylist) => {
   try {
     if (data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      localStorage.setItem(key, JSON.stringify(data));
     }
   } catch (error) {
     console.error("Error saving to localStorage:", error);
   }
 };
 
-export const loadPlayListFromStorage = () => {
-  const data = localStorage.getItem(STORAGE_KEY);
+export const updatePlayListInStorage = (key: string, audioTracks: AudioTrackData[]) => {
+  try {
+    if (audioTracks) {
+      const storageData = localStorage.getItem(key);
+      if (storageData) {
+        const playList = JSON.parse(storageData) as MusicPlaylist;
+        playList.positions = mapToPlayList(audioTracks);
+        localStorage.setItem(key, JSON.stringify(playList));
+      }
+    }
+  } catch (error) {
+    console.error("Error saving to localStorage:", error);
+  }
+}
+
+export const loadPlayListFromStorage = (key: string) => {
+  const data = localStorage.getItem(key);
   return data ? JSON.parse(data) as MusicPlaylist : EMPTY_LIST;
 };
 

@@ -10,6 +10,7 @@ interface UseFilterValidAudiosOptions {
   itemTimeout?: number;
   checkWithProxyAfter?: number;
   globalTimeout?: number;
+  showValidatingTracks?: boolean;
 }
 
 interface UseFilterValidAudiosResult<T extends AudioTrackData> {
@@ -28,7 +29,8 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
   concurrency = 3,
   itemTimeout = 1500,
   globalTimeout = 7000,
-  checkWithProxyAfter = 3000
+  checkWithProxyAfter = 3000,
+  showValidatingTracks = false
 }: UseFilterValidAudiosOptions): UseFilterValidAudiosResult<AudioTrackData> => {
 
   const [validated, setValidated] = useState<AudioTrackData[]>([]);
@@ -266,6 +268,9 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
       }
     };
 
+    if (showValidatingTracks) {
+      setValidated(items.map(item => createInvalidResult(item)))
+    }
     for (let i = 0; i < Math.min(concurrency, items.length); i++) {
       startNextIfNeeded();
     }
