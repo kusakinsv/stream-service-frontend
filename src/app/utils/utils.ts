@@ -21,4 +21,15 @@ export function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-
+export function shufflePlaylist<T extends { position: number }>(array: T[]): T[] {
+  const shuffled = [...array]; // Создаем копию, чтобы не мутировать исходный массив
+  const positions = shuffled.map(item => item.position);
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  shuffled.forEach((item, index) => {
+    item.position = positions[index];
+  });
+  return shuffled;
+}

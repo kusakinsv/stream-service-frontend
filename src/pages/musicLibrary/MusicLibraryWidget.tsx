@@ -30,7 +30,7 @@ import { mapToPlayList, mapToPlayListItem, savePlayListToStorage } from "@/app/u
 
 export const MusicLibraryWidget = () => {
   const { deleteTrack, libraryItems, setLibraryItems } = usePlaylistStore();
-  const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist} = useAudioStore();
+  const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist, isShuffle} = useAudioStore();
 
   const { data, isLoading } = useGetMusicLibrary({});
   const { mutate: deleteItem } = useDeleteTrackFromLibrary();
