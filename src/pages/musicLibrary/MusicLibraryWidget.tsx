@@ -46,7 +46,7 @@ export const MusicLibraryWidget = () => {
     itemTimeout: 2000,
     globalTimeout: 10000,
     checkWithProxyAfter: 1500,
-    showValidatingTracks: false
+    showValidatingTracks: true
   });
 
   const handleDeleteItem = (item: AudioTrackData) => {
