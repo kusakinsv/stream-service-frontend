@@ -330,7 +330,12 @@ function addProxy(url: string) {
 
 function updateByValidItem(list: AudioTrackData[], validItem: AudioTrackData) {
   const index = list.findIndex(item => item.url === validItem.url);
-  const newArr = [...list];
-  newArr[index] = validItem;
-  return newArr;
+  if (index !== -1) {
+    const newArr = [...list];
+    newArr[index] = validItem;
+    return newArr;
+  } else {
+    return [...list, validItem];
+  }
+
 }
