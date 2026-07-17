@@ -34,6 +34,8 @@ import {
 
 
 export const MusicLibraryWidget = () => {
+  const { deleteTrack, libraryItems, setLibraryItems } = usePlaylistStore();
+  const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist, isShuffle} = useAudioStore();
   const { deleteTrack, libraryItems, setLibraryItems } = useLibraryStore();
   const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist} = useAudioStore();
 
@@ -73,6 +75,7 @@ export const MusicLibraryWidget = () => {
         movedArr[i].position = i + 1;
       }
       setLibraryItems(movedArr);
+      // console.log(data !== null && data !== undefined);
       setCurrentPlaylist(movedArr);
       if (data) {
         reOrderPlaylist({ id: data.id, positions: mapToPlayList(movedArr) });
@@ -84,7 +87,7 @@ export const MusicLibraryWidget = () => {
 
   //для добавления
   useEffect(() => {
-    if (validatedItems.length > libraryItems.length) {
+    if (validatedItems.length >= libraryItems.length) {
       setLibraryItems(validatedItems);
     }
   }, [validatedItems]);

@@ -239,7 +239,7 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
         if (validationCache.has(item.url)) {
           const validItem = validationCache.get(item.url);
           if (validItem) {
-            setValidated(prev => [...prev, validItem]);
+            setValidated(prev => updateByValidItem(prev, validItem));
             activeRequestsRef.current--;
             continue;
           }
@@ -249,7 +249,8 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
           .then((result) => {
             if (isMountedRef.current && !addedUrls.has(item.url)) {
               addedUrls.add(item.url);
-              setValidated(prev => [...prev, result]);
+              // setValidated(prev => [...prev, result]);
+              setValidated(prev => updateByValidItem(prev, result));
             }
           })
           .finally(() => {
@@ -268,7 +269,7 @@ export const useValidateAudioTracks = <T extends AudioItem>(items: T[], {
       }
     };
 
-    if (showValidatingTracks) {
+    if (showValidatingTracks && validated.length === 0) {
       setValidated(items.map(item => createInvalidResult(item)))
     }
     for (let i = 0; i < Math.min(concurrency, items.length); i++) {
@@ -325,4 +326,11 @@ function createInvalidResult<T extends AudioItem>(item: T): AudioTrackData {
 
 function addProxy(url: string) {
   return PROXY_SERVER_URL + PROXY_SERVER_PART + url;
+}
+
+function updateByValidItem(list: AudioTrackData[], validItem: AudioTrackData) {
+  const index = list.findIndex(item => item.url === validItem.url);
+  const newArr = [...list];
+  newArr[index] = validItem;
+  return newArr;
 }
