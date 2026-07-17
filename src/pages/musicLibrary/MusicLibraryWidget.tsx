@@ -34,10 +34,8 @@ import {
 
 
 export const MusicLibraryWidget = () => {
-  const { deleteTrack, libraryItems, setLibraryItems } = usePlaylistStore();
-  const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist, isShuffle} = useAudioStore();
   const { deleteTrack, libraryItems, setLibraryItems } = useLibraryStore();
-  const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist} = useAudioStore();
+  const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist, isShuffle} = useAudioStore();
 
   const { data, isLoading } = useGetMusicLibrary({});
   const { mutate: deleteItem } = useDeleteTrackFromLibrary();
@@ -48,6 +46,7 @@ export const MusicLibraryWidget = () => {
     itemTimeout: 2000,
     globalTimeout: 10000,
     checkWithProxyAfter: 1500,
+    showValidatingTracks: false
   });
 
   const handleDeleteItem = (item: AudioTrackData) => {
@@ -77,7 +76,7 @@ export const MusicLibraryWidget = () => {
       setLibraryItems(movedArr);
       // console.log(data !== null && data !== undefined);
       setCurrentPlaylist(movedArr);
-      if (data) {
+      if (data && !isShuffle) {
         reOrderPlaylist({ id: data.id, positions: mapToPlayList(movedArr) });
       }
     }
