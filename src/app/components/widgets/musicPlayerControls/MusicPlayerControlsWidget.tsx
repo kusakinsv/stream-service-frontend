@@ -27,6 +27,8 @@ export const MusicPlayerControlsWidget = () => {
   const activeColor = theme.palette.action.active;
   const disabledColor = theme.palette.action.disabled;
 
+
+
   const onNextHandler = () => {
     state.next();
   };
@@ -56,6 +58,9 @@ export const MusicPlayerControlsWidget = () => {
     state.progressTo(value);
   };
 
+  const currentPosition = state.getCurrentPlaylist().findIndex(track => track === state.currentTrack);
+  const trackPosition = `${currentPosition+1} / ${state.getCurrentPlaylist().length}`
+
   return (
     <Box id="controls"
          sx={{
@@ -74,6 +79,7 @@ export const MusicPlayerControlsWidget = () => {
             onChangeProgress={onChangeProgress}
           />
         </Stack>
+        <Box>{trackPosition ?? "-"}</Box>
         <Box>{state.currentTrack?.title ?? "-"}</Box>
         <Stack direction={"row"} sx={{
           alignItems: "center",

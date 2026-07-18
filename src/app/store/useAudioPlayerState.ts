@@ -3,6 +3,8 @@ import { subscribeWithSelector } from "zustand/middleware";
 
 import type { AudioTrackData } from "@/app/types.ts";
 
+import { shufflePlaylist } from "@/app/utils/utils.ts";
+
 
 export enum RepeatType {
   NONE,
@@ -18,7 +20,8 @@ interface AudioPlayerState {
   duration: number;
   currentTime: number;
   error: null | string;
-  currentPlaylist: AudioTrackData[];
+  normalState: AudioTrackData[];
+  shuffledState: AudioTrackData[];
   repeatType: RepeatType;
   isShuffle: boolean;
 
@@ -37,7 +40,10 @@ interface AudioPlayerState {
   setCurrentPlaylist: (playlist: AudioTrackData[]) => void;
   setVolume: (volume: number) => void;
   toggleShuffle: () => void;
+  setShuffledState: (playlist: AudioTrackData[]) => void;
+  clearShuffleState: () => void;
   toggleRepeat: () => void;
+  getCurrentPlaylist: () => AudioTrackData[];
 }
 
 export const useAudioStore = create<AudioPlayerState>()(
@@ -49,13 +55,14 @@ export const useAudioStore = create<AudioPlayerState>()(
     audioRef: null,
     isPlaying: false,
     currentTrack: null,
-    currentPlaylist: [],
+    normalState: [],
+    shuffledState: [],
     repeatType: RepeatType.NONE,
     isShuffle: false,
 
 
     setCurrentTrack: (track, ofPlaylist) => {
-      const { currentTrack, audioRef: currentRef, progressTo } = get();
+      const { currentTrack, audioRef: currentRef, progressTo, setCurrentPlaylist } = get();
 
       // если уже играет трек, то ставим ему паузу и сбрасываем прогресс
       if (currentTrack !== track && currentRef) {
@@ -70,8 +77,9 @@ export const useAudioStore = create<AudioPlayerState>()(
         currentTrack: track,
         audioRef: track.audioElem,
         duration: track.duration ?? 0,
-        currentPlaylist: ofPlaylist,
+        // currentPlaylist: ofPlaylist,
       });
+      setCurrentPlaylist(ofPlaylist);
 
       const { audioRef, volume } = get();
       if (audioRef) {
@@ -149,16 +157,16 @@ export const useAudioStore = create<AudioPlayerState>()(
     },
 
     handleTrackEnd: () => {
-      const { next, currentPlaylist, currentTrack, repeatType, setCurrentTrack } = get();
-      const index = currentPlaylist.findIndex(item => item.url === (currentTrack ? currentTrack.url : -1));
+      const { next, getCurrentPlaylist, currentTrack, repeatType, setCurrentTrack, isShuffle, shuffledState } = get();
+      const index = getCurrentPlaylist().findIndex(item => item.url === (currentTrack ? currentTrack.url : -1));
       if (repeatType === RepeatType.SINGLE) {
-        setCurrentTrack(currentTrack ?? currentPlaylist[0], currentPlaylist)
+        setCurrentTrack(currentTrack ?? getCurrentPlaylist()[0], getCurrentPlaylist());
       } else {
-        if (index != currentPlaylist.length - 1) {
+        if (index != getCurrentPlaylist().length - 1) {
           next();
         } else {
           if (repeatType === RepeatType.PLAYLIST) {
-            setCurrentTrack(currentPlaylist[0], currentPlaylist)
+            setCurrentTrack(isShuffle ? shuffledState[0] : getCurrentPlaylist()[0], getCurrentPlaylist());
           } else {
             set({
               isPlaying: false,
@@ -185,42 +193,83 @@ export const useAudioStore = create<AudioPlayerState>()(
     },
 
     setCurrentPlaylist: (playlist) => {
-      set({
-        currentPlaylist: playlist,
-      });
+      const { isShuffle } = get();
+      if (isShuffle) {
+        set({
+          shuffledState: playlist,
+        });
+      } else {
+        set({
+          normalState: playlist,
+        });
+      }
+
     },
 
     next: () => {
-      const { currentPlaylist, currentTrack, setCurrentTrack, isShuffle } = get();
+      const { getCurrentPlaylist, currentTrack, setCurrentTrack, repeatType, next } = get();
       if (currentTrack) {
-        const currentIndex = currentPlaylist.indexOf(currentTrack);
-        if (isShuffle) {
-          const currentIndex = currentPlaylist.indexOf(currentTrack);
-          let randomIndex = Math.floor(Math.random() * currentPlaylist.length);
-          if (randomIndex === currentIndex) randomIndex = randomIndex + 1;
-          setCurrentTrack(currentPlaylist[randomIndex], currentPlaylist);
+        const currentIndex = getCurrentPlaylist().indexOf(currentTrack);
+        if (currentIndex + 1 < getCurrentPlaylist().length) {
+          const nextTrack = getCurrentPlaylist()[currentIndex + 1];
+          setCurrentTrack(nextTrack, getCurrentPlaylist());
+          if (!nextTrack.isValid) {
+            if (currentIndex + 1 < getCurrentPlaylist().length) {
+              next();
+            }
+          }
         } else {
-          if (currentIndex + 1 < currentPlaylist.length) {
-            setCurrentTrack(currentPlaylist[currentIndex + 1], currentPlaylist);
+          if (repeatType === RepeatType.PLAYLIST) {
+            setCurrentTrack(getCurrentPlaylist()[0], getCurrentPlaylist());
           }
         }
       }
     },
 
     prev: () => {
-      const { currentPlaylist, currentTrack, setCurrentTrack } = get();
+      const { getCurrentPlaylist, currentTrack, setCurrentTrack, repeatType , prev} = get();
       if (currentTrack) {
-        const currentIndex = currentPlaylist.indexOf(currentTrack);
+        const currentIndex = getCurrentPlaylist().indexOf(currentTrack);
         if (currentIndex !== 0) {
-          setCurrentTrack(currentPlaylist[currentIndex - 1], currentPlaylist);
+        const prevTrack = getCurrentPlaylist()[currentIndex - 1]
+          setCurrentTrack(prevTrack, getCurrentPlaylist());
+          if (!prevTrack.isValid) {
+            if (currentIndex !== 0) {
+              prev();
+            }
+          }
+        } else {
+          if (repeatType === RepeatType.PLAYLIST) {
+            setCurrentTrack(getCurrentPlaylist()[getCurrentPlaylist().length-1], getCurrentPlaylist());
+          }
         }
       }
     },
 
     toggleShuffle: () => {
-      const { isShuffle } = get();
+      const { isShuffle, normalState } = get();
+      if (!isShuffle) {
+        set({
+          isShuffle: true,
+          shuffledState: shufflePlaylist(normalState),
+        });
+      } else {
+        set({
+          isShuffle: false,
+          shuffledState: [],
+        });
+      }
+    },
+
+    setShuffledState: (playlist) => {
       set({
-        isShuffle: !isShuffle,
+        shuffledState: playlist,
+      });
+    },
+
+    clearShuffleState: () => {
+      set({
+        shuffledState: [],
       });
     },
 
@@ -239,6 +288,12 @@ export const useAudioStore = create<AudioPlayerState>()(
           repeatType: RepeatType.NONE,
         });
       }
+    },
+
+    getCurrentPlaylist: () => {
+      const { isShuffle, normalState, shuffledState } = get();
+      if (isShuffle) return shuffledState;
+      else return normalState;
     },
 
   })),
