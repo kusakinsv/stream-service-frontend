@@ -146,7 +146,10 @@ export const MusicLibraryWidget = () => {
               strategy={verticalListSortingStrategy}
             >
 
-              <List>
+              <List sx={{
+                maxWidth: 'lg',
+                margin: "0 auto"
+              }}>
                 {itemElements()}
               </List>
 

@@ -24,6 +24,7 @@ interface AudioPlayerState {
   shuffledState: AudioTrackData[];
   repeatType: RepeatType;
   isShuffle: boolean;
+  isControlsExpanded: boolean;
 
   reset: () => void;
   play: () => void;
@@ -44,6 +45,7 @@ interface AudioPlayerState {
   clearShuffleState: () => void;
   toggleRepeat: () => void;
   getCurrentPlaylist: () => AudioTrackData[];
+  toggleControlsExpanded: () => void;
 }
 
 export const useAudioStore = create<AudioPlayerState>()(
@@ -59,6 +61,7 @@ export const useAudioStore = create<AudioPlayerState>()(
     shuffledState: [],
     repeatType: RepeatType.NONE,
     isShuffle: false,
+    isControlsExpanded: true,
 
 
     setCurrentTrack: (track, ofPlaylist) => {
@@ -294,6 +297,13 @@ export const useAudioStore = create<AudioPlayerState>()(
       const { isShuffle, normalState, shuffledState } = get();
       if (isShuffle) return shuffledState;
       else return normalState;
+    },
+
+    toggleControlsExpanded: () => {
+      const {isControlsExpanded} = get();
+      set({
+        isControlsExpanded: !isControlsExpanded,
+      });
     },
 
   })),

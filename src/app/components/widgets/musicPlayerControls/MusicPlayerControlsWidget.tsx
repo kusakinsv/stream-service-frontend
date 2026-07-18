@@ -1,11 +1,12 @@
 import React from "react";
 import PauseIcon from "@mui/icons-material/Pause";
-import { Box, Stack, useTheme } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ShuffleRoundedIcon from "@mui/icons-material/ShuffleRounded";
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
 import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
+import { Box, Stack, Button, useTheme, ListItem, Typography, ListItemText, ListItemButton } from "@mui/material";
 
+import { formatTime } from "@/app/utils/utils.ts";
 import { RepeatIcon } from "@/app/components/icons/RepeatIcon.tsx";
 import { RepeatType, useAudioStore } from "@/app/store/useAudioPlayerState.ts";
 import { AudioProgress } from "@/app/components/widgets/musicPlayerControls/components/AudioProgress.tsx";
@@ -21,13 +22,16 @@ const sxIconsPlayPause = {
   cursor: "pointer",
 };
 
+const unExpandedControls = {
+  fontSize: "2.5rem",
+  cursor: "pointer",
+};
+
 export const MusicPlayerControlsWidget = () => {
   const state = useAudioStore();
   const theme = useTheme();
   const activeColor = theme.palette.action.active;
   const disabledColor = theme.palette.action.disabled;
-
-
 
   const onNextHandler = () => {
     state.next();
@@ -58,33 +62,97 @@ export const MusicPlayerControlsWidget = () => {
     state.progressTo(value);
   };
 
+  const handleExpandedClick = () => {
+    state.toggleControlsExpanded();
+  };
+
   const currentPosition = state.getCurrentPlaylist().findIndex(track => track === state.currentTrack);
-  const trackPosition = `${currentPosition+1} / ${state.getCurrentPlaylist().length}`
+  const trackPosition = `${currentPosition + 1} / ${state.getCurrentPlaylist().length}`;
+
+  if (!state.isControlsExpanded) {
+
+    return <Box id="controls-unexpanded" >
+      <ListItem disablePadding sx={{
+        maxWidth: "lg",
+        margin: "0 auto",
+      }}>
+        <ListItemButton sx={{margin: "0 3.2px"}}>
+          <Box sx={{
+            display: "flex",
+            width: "100%",
+            justifyContent: "space-between",
+          }} onClick={handleExpandedClick}>
+            <ListItemText primary={state.currentTrack?.title ?? "-"} />
+          </Box>
+          <Stack spacing={1} direction={"row"} sx={{
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <SkipPreviousRoundedIcon sx={unExpandedControls} onClick={handleClickPrev}
+                                     onDoubleClick={handleDoubleClickPrev} />
+            {state.isPlaying
+              ? <PauseIcon sx={unExpandedControls} onClick={() => state.pause()} />
+              : <PlayArrowIcon sx={unExpandedControls} onClick={() => state.play()} />}
+
+            <SkipNextRoundedIcon sx={unExpandedControls} onClick={onNextHandler} />
+          </Stack>
+
+        </ListItemButton>
+      </ListItem>
+    </Box>;
+  }
 
   return (
-    <Box id="controls"
+    <Box id="controls-expanded"
          sx={{
-           height: "27vh",
            backgroundColor: "#222222",
-           flexShrink: 0,
+           // flexShrink: 0,
            margin: "0 auto",
            maxWidth: "1200px",
            width: "100%",
          }}>
-      <Stack spacing={1}>
-        <Stack>
-          <AudioProgress
-            currentTime={state.currentTime}
-            duration={state.duration}
-            onChangeProgress={onChangeProgress}
-          />
-        </Stack>
-        <Box>{trackPosition ?? "-"}</Box>
-        <Box>{state.currentTrack?.title ?? "-"}</Box>
+      <Box>
+        <Button onClick={handleExpandedClick}
+                id="expand"
+                size="medium"
+                sx={{ width: "1rem", backgroundColor: "grey", mb: 2 }}>
+        </Button>
+      </Box>
+      <Stack spacing={0.2}>
+
+
+        <Box sx={{
+          width: "100%",
+          padding: {
+            md: "0 5rem",
+            xs: "0 2.5rem",
+          },
+        }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+            <Typography variant="caption">
+              {formatTime(state.currentTime)}
+            </Typography>
+            <Typography variant="inherit">
+              {state.currentTrack?.title ?? "-"}
+            </Typography>
+            <Typography variant="caption">
+              {formatTime(state.duration)}
+            </Typography>
+          </Box>
+        </Box>
+        <AudioProgress
+          currentTime={state.currentTime}
+          duration={state.duration}
+          onChangeProgress={onChangeProgress}
+        />
+
+        <Typography variant="caption">
+          {trackPosition ?? "-"}
+        </Typography>
+
         <Stack direction={"row"} sx={{
           alignItems: "center",
           justifyContent: "space-around",
-          pb: 2,
         }}>
           <Box sx={{ cursor: "pointer" }} onClick={handleRepeatClick}>
             <RepeatIcon color={state.repeatType !== RepeatType.NONE ? activeColor : disabledColor}

@@ -1,7 +1,5 @@
 import { useState, useCallback } from "react";
-import { Box, Slider, Typography, LinearProgress } from "@mui/material";
-
-import { formatTime } from "@/app/utils/utils.ts";
+import { Box, Slider, LinearProgress } from "@mui/material";
 
 interface AudioProgressProps {
   currentTime: number;
@@ -32,21 +30,19 @@ export const AudioProgress = ({ currentTime, duration, onChangeProgress }: Audio
 
 
   return (
-    <Box sx={{
+    <Box id="audio-progress-container" sx={{
       width: "100%",
       padding: {
         md: "0 5rem",
         xs: "0 2.5rem",
       },
     }}>
-      <Box sx={{
-        // display: "flex",
-        alignItems: "center", /* Центрирует элементы по вертикали */
-        // justifyContent: "center", /* Горизонтальное выравнивание (опционально) */
-        height:" 40px", /* Задайте нужную высоту контейнеру */
+      <Box id="ssss1" sx={{
+        verticalAlign: "center",
+        height:"30px",
       }}>
         <Box sx={{
-          minHeight: "50px",
+          minHeight: "31px",
           position: "relative",
         }}>
 
@@ -74,7 +70,7 @@ export const AudioProgress = ({ currentTime, duration, onChangeProgress }: Audio
                     // top: "30%",
                     // top: {xs: "10%"},
                     left: 0,
-                    height: 16,
+                    height: 0,
                     // margin: "0 0 0 0",
                     // padding: "0 0 0 0",
                     // width: "100%",
@@ -93,14 +89,7 @@ export const AudioProgress = ({ currentTime, duration, onChangeProgress }: Audio
           </Slider>
         </Box>
       </Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-        <Typography variant="caption">
-          {formatTime(currentTime)}
-        </Typography>
-        <Typography variant="caption">
-          {formatTime(duration)}
-        </Typography>
-      </Box>
+
     </Box>
   );
 };
