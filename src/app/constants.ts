@@ -1,1 +1,1 @@
-export const PROXY_SERVER_URL = "http://localhost:8123";
+export const PROXY_SERVER_URL = import.meta.env.VITE_PROXY_URL || "http://localhost:8123";
