@@ -71,12 +71,12 @@ export const MusicPlayerControlsWidget = () => {
 
   if (!state.isControlsExpanded) {
 
-    return <Box id="controls-unexpanded" >
+    return <Box id="controls-unexpanded">
       <ListItem disablePadding sx={{
         maxWidth: "lg",
         margin: "0 auto",
       }}>
-        <ListItemButton sx={{margin: "0 3.2px"}}>
+        <ListItemButton sx={{ margin: "0 3.2px" }}>
           <Box sx={{
             display: "flex",
             width: "100%",
@@ -111,11 +111,16 @@ export const MusicPlayerControlsWidget = () => {
            maxWidth: "1200px",
            width: "100%",
          }}>
-      <Box>
-        <Button onClick={handleExpandedClick}
-                id="expand"
-                size="medium"
-                sx={{ width: "1rem", backgroundColor: "grey", mb: 2 }}>
+      <Box onClick={handleExpandedClick} sx={{
+        cursor: "pointer",
+        "&:hover .MuiButton-root": {
+          backgroundColor: "secondary.light",
+        },
+      }}>
+        <Button
+          id="expand"
+          size="small"
+          sx={{ width: "1rem", backgroundColor: "grey", mb: 2 }}>
         </Button>
       </Box>
       <Stack spacing={0.2}>

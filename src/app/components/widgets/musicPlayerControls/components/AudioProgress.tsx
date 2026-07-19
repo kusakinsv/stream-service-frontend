@@ -37,9 +37,9 @@ export const AudioProgress = ({ currentTime, duration, onChangeProgress }: Audio
         xs: "0 2.5rem",
       },
     }}>
-      <Box id="ssss1" sx={{
+      <Box sx={{
         verticalAlign: "center",
-        height:"30px",
+        height: "30px",
       }}>
         <Box sx={{
           minHeight: "31px",
