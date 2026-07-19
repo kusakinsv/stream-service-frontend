@@ -122,6 +122,9 @@ export const MusicPlayerControlsWidget = () => {
     </Box>;
   }
 
+  const currentTime = state.currentTime;
+  const duration = state.duration;
+  const timeLeft = duration-currentTime
   return (
     <Box id="controls-expanded"
          sx={{
@@ -154,7 +157,7 @@ export const MusicPlayerControlsWidget = () => {
 
           }}>
             <Typography variant="caption">
-              {formatTime(state.currentTime)}
+              {formatTime(currentTime)}
             </Typography>
             <TextRunner align="center">
               <Typography id="trackRoadText" variant="inherit">
@@ -162,12 +165,12 @@ export const MusicPlayerControlsWidget = () => {
               </Typography>
             </TextRunner>
             <Typography variant="caption">
-              {formatTime(state.duration)}
+              {formatTime(timeLeft)}
             </Typography>
           </Box>
         <AudioProgress
-          currentTime={state.currentTime}
-          duration={state.duration}
+          currentTime={currentTime}
+          duration={duration}
           onChangeProgress={onChangeProgress}
         />
 
