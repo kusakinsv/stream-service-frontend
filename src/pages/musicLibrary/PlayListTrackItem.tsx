@@ -6,6 +6,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import type { AudioTrackData } from "@/app/types.ts";
 
 import { getColors } from "@/app/theme/colors.ts";
+import { TextRunner } from "@/app/components/TextRunner/TextRunner.tsx";
 import { CircleButton } from "@/app/components/button/ItemButton/CircleButton.ts";
 
 interface ITrackItemProps {
@@ -35,6 +36,9 @@ export const PlayListTrackItem = (
         justifyContent: "space-between",
       }}>
       <Stack spacing={2} direction="row" sx={{
+        flex: "1 1 auto",
+        minWidth: 0,
+        overflow: "hidden",
         alignItems: "center",
         justifyContent: "flex-start",
       }}>
@@ -45,13 +49,16 @@ export const PlayListTrackItem = (
           justifyContent: "space-between",
         }}>
           <Box sx={!item.isValid ? sxInvalid : {}}>
-            {item.title}
+            <TextRunner speed={8}>
+              {item.title}
+            </TextRunner>
+
           </Box>
           <Box sx={!item.isValid ? sxInvalid : {}}>
             {formattedDuration}
           </Box>
         </Stack>
-      </Stack>
+      </Stack >
         <IconButton onClick={() => onDeleteClick(item)}>
           <DeleteForeverIcon fontSize="large" sx={{
             color: 'grey.500',
