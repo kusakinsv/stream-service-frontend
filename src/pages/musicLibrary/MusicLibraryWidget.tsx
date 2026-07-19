@@ -130,7 +130,7 @@ export const MusicLibraryWidget = () => {
 
   return (
     <>
-      <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
+      <Typography variant="h5"  sx={{ mt: 1 }}>
         {data?.title}
       </Typography>
       {isLoading ? "Loading..." : (

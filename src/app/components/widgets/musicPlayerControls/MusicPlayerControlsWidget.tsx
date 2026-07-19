@@ -8,6 +8,7 @@ import { Box, Stack, Button, useTheme, ListItem, Typography, ListItemText, ListI
 
 import { formatTime } from "@/app/utils/utils.ts";
 import { RepeatIcon } from "@/app/components/icons/RepeatIcon.tsx";
+import { TextRunner } from "@/app/components/TextRunner/TextRunner.tsx";
 import { RepeatType, useAudioStore } from "@/app/store/useAudioPlayerState.ts";
 import { AudioProgress } from "@/app/components/widgets/musicPlayerControls/components/AudioProgress.tsx";
 import { VolumeControl } from "@/app/components/widgets/musicPlayerControls/components/VolumeControl.tsx";
@@ -76,17 +77,36 @@ export const MusicPlayerControlsWidget = () => {
         maxWidth: "lg",
         margin: "0 auto",
       }}>
-        <ListItemButton sx={{ margin: "0 3.2px" }}>
+        <ListItemButton sx={{
+          paddingLeft: {
+            xs: "4px",
+            md: "1.1rem"
+          },
+          margin: "0 3.2px",
+          display: "flex",
+          gap: 1,
+          minWidth: 0, // Важно для сжатия
+        }}>
           <Box sx={{
-            display: "flex",
-            width: "100%",
+            flex: "1 1 auto",
+            minWidth: 0,
+            overflow: "hidden",
             justifyContent: "space-between",
+
           }} onClick={handleExpandedClick}>
-            <ListItemText primary={state.currentTrack?.title ?? "-"} />
+            <TextRunner speed={8}>
+              <ListItemText primary={state.currentTrack?.title ?? "-"}
+                            sx={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                            }}/>
+            </TextRunner>
           </Box>
           <Stack spacing={1} direction={"row"} sx={{
+            flex: "0 0 auto",
             alignItems: "center",
             justifyContent: "center",
+            flexShrink: 0, // Запрещаем сжатие
           }}>
             <SkipPreviousRoundedIcon sx={unExpandedControls} onClick={handleClickPrev}
                                      onDoubleClick={handleDoubleClickPrev} />
@@ -125,26 +145,26 @@ export const MusicPlayerControlsWidget = () => {
       </Box>
       <Stack spacing={0.2}>
 
-
-        <Box sx={{
-          width: "100%",
-          padding: {
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 , gap: 2, alignItems: "center",
+            width: "100%",
+            padding: {
             md: "0 5rem",
             xs: "0 2.5rem",
           },
-        }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+
+          }}>
             <Typography variant="caption">
               {formatTime(state.currentTime)}
             </Typography>
-            <Typography variant="inherit">
-              {state.currentTrack?.title ?? "-"}
-            </Typography>
+            <TextRunner align="center">
+              <Typography id="trackRoadText" variant="inherit">
+                {state.currentTrack?.title ?? "-"}
+              </Typography>
+            </TextRunner>
             <Typography variant="caption">
               {formatTime(state.duration)}
             </Typography>
           </Box>
-        </Box>
         <AudioProgress
           currentTime={state.currentTime}
           duration={state.duration}

@@ -61,7 +61,7 @@ export const useAudioStore = create<AudioPlayerState>()(
     shuffledState: [],
     repeatType: RepeatType.NONE,
     isShuffle: false,
-    isControlsExpanded: true,
+    isControlsExpanded: false,
 
 
     setCurrentTrack: (track, ofPlaylist) => {
