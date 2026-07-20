@@ -7,7 +7,6 @@ export default defineConfig(({ mode }) => {
   return {
 
     plugins: [react()],
-    // envDir: "./", // явно указываем папку с .env файлами
     define: {
       "import.meta.env.PROXY_URL": process.env.VITE_CORE_URL,
     },
@@ -23,7 +22,7 @@ export default defineConfig(({ mode }) => {
         "/search-service/api/v1": {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/search-service/, ""),
-          target: env.VITE_SERCHER_URL || "http://localhost:8102",
+          target: env.VITE_SEARCHER_URL || "http://localhost:8102",
         },
         "/stream-service/api/v1": {
           changeOrigin: true,
