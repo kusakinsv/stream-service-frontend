@@ -9,7 +9,7 @@ const getEnv = (key: string, fallback: string) => {
 export default defineConfig({
 
   plugins: [react()],
-  envDir: "./", // явно указываем папку с .env.production файлами
+  envDir: "./",
   define: {
     "import.meta.env.PROXY_URL": JSON.stringify(process.env.VITE_CORE_URL),
   },
