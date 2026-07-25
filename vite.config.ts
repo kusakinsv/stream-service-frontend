@@ -9,7 +9,7 @@ const getEnv = (key: string, fallback: string) => {
 export default defineConfig({
 
   plugins: [react()],
-  envDir: "./", // явно указываем папку с .env файлами
+  envDir: "./", // явно указываем папку с .env.production файлами
   define: {
     "import.meta.env.PROXY_URL": JSON.stringify(process.env.VITE_CORE_URL),
   },
@@ -20,18 +20,21 @@ export default defineConfig({
   },
   server: {
     host: "0.0.0.0",
+    port: 5173,
     proxy: {
       '/core': {
         changeOrigin: true,
-        // rewrite: (path) => path.replace(/^\/stream-service/, ""),
         target: getEnv("VITE_CORE_URL", "http://localhost:8101"),
-        rewrite: (path) => path.replace(/^\/core/, ''),
-        // target: "http://localhost:8101",
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
       },
       '/internet-searcher': {
         changeOrigin: true,
-        // rewrite: (path) => path.replace(/^\/stream-service/, ""),
-        target: getEnv("VITE_CORE_URL", "http://localhost:8101"),
+        target: getEnv("VITE_SEARCHER_URL", "http://localhost:8102"),
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
       },
     },
   },
