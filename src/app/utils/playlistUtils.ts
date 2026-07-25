@@ -1,5 +1,5 @@
-import type { MusicPlaylist } from "@/app/quires/libraryQuires.ts";
 import type { PlayListItem, AudioTrackData } from "@/app/types.ts";
+import type { MusicPlaylist } from "@/app/api/quires/libraryQuires.ts";
 
 export const EMPTY_LIST = {
   id: -1,

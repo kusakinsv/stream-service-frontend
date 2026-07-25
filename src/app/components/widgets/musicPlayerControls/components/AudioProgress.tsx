@@ -65,9 +65,9 @@ export const AudioProgress = ({ currentTime, duration, onChangeProgress }: Audio
           />
           <Slider value={isDragging ? localProgress : progress} min={0} max={100}
                   sx={{
-                    position: "absolute",
+                    position: "relative",
                     bottom: 0,
-                    // top: "30%",
+                    top: 6,
                     // top: {xs: "10%"},
                     left: 0,
                     height: 0,

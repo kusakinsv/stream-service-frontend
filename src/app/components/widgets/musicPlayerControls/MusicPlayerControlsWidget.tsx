@@ -142,8 +142,8 @@ export const MusicPlayerControlsWidget = () => {
       }}>
         <Button
           id="expand"
-          size="small"
-          sx={{ width: "1rem", backgroundColor: "grey", mb: 2 }}>
+          size="medium"
+          sx={{ width: "1rem", backgroundColor: "grey", mb: 2, borderRadius: 0.3}}>
         </Button>
       </Box>
       <Stack spacing={0.2}>

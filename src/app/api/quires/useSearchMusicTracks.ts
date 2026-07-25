@@ -3,15 +3,15 @@ import type { AxiosError, AxiosResponse } from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { AudioItem } from "@/app/types.ts";
-import type { BaseError } from "@/app/quires/types.ts";
+import type { BaseError } from "@/app/api/quires/types.ts";
 
-import { getMusicTracks } from "@/app/quires/getMusicTracks.ts";
+import { searchQuires } from "@/app/api/quires/searchQuires.ts";
 
 export const useSearchMusicTracks = () => {
   const queryClient = useQueryClient();
 
   return useMutation<AxiosResponse<AudioItem[]>, AxiosError<BaseError>, string>({
-    mutationFn: (trackName: string) => getMusicTracks({
+    mutationFn: (trackName: string) => searchQuires({
       query: trackName ?? "",
     }),
     onSuccess: (data) => {

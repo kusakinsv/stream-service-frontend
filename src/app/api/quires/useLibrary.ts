@@ -2,7 +2,7 @@ import type { AxiosError, AxiosResponse } from "axios";
 
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-import type { BaseError } from "@/app/quires/types.ts";
+import type { BaseError } from "@/app/api/quires/types.ts";
 import type { PlayListItem, AudioTrackData } from "@/app/types.ts";
 import type { DraggableItem } from "@/app/components/dnd/types.ts";
 
@@ -13,7 +13,7 @@ import {
   type MusicPlaylist,
   deleteTrackFromLibrary,
   deleteTrackFromLibraryById,
-} from "@/app/quires/libraryQuires.ts";
+} from "@/app/api/quires/libraryQuires.ts";
 
 
 interface UseGetDataProps{

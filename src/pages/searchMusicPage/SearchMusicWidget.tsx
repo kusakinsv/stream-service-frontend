@@ -4,12 +4,12 @@ import { useMemo, useEffect } from "react";
 import type { AudioTrackData } from "@/app/types.ts";
 
 import { removeDuplicates } from "@/app/utils/utils.ts";
-import { useAddTrackToLibrary } from "@/app/quires/useLibrary.ts";
 import { useLibraryStore } from "@/app/store/usePlaylistState.ts";
 import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
 import { useSearchStore } from "@/app/store/useMusicSearchtState.ts";
+import { useAddTrackToLibrary } from "@/app/api/quires/useLibrary.ts";
 import { SearchPanel } from "@/pages/searchMusicPage/SearchPanel.tsx";
-import { useSearchMusicTracks } from "@/app/quires/useSearchMusicTracks.ts";
+import { useSearchMusicTracks } from "@/app/api/quires/useSearchMusicTracks.ts";
 import { TrackItem } from "@/pages/searchMusicPage/components/trackItem/TrackItem.tsx";
 import { mapToPlayListItem, updatePlayListInStorage } from "@/app/utils/playlistUtils.ts";
 import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAudioTracks.ts";
@@ -37,7 +37,7 @@ export const SearchMusicWidget = () => {
     if (validatedItems.length > foundTracks.length) {
       setFoundTracks(validatedItems)
     }
-  }, [foundTracks.length, setFoundTracks, validatedItems]);
+  }, [foundTracks.length, setFoundTracks, validatedItems, data]);
 
    const handleSearch = (track: string) => {
     clear();

@@ -1,0 +1,26 @@
+version: "3.7"
+
+name: stream-service
+
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: .stream-service-docker/Dockerfile
+    container_name: stream-service-frontend
+    ports:
+      - "3000:80"  # Пробрасываем порт на хост
+    networks:
+      - stream-service_stream-service  # Подключаемся к существующей сети
+    environment:
+      - VITE_CORE_URL=http://62.16.42.67:8101
+      - VITE_SEARCHER_URL=http://62.16.42.67:8102
+      - VITE_PROXY_URL=http://62.16.42.67:8123
+    restart: unless-stopped
+
+
+#удалить external если сеть уже создана, добавить если её нет
+networks:
+  stream-service_stream-service:
+    driver: bridge
+    external: true

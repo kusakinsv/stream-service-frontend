@@ -18,13 +18,13 @@ import {
 
 import type { AudioTrackData } from "@/app/types.ts";
 
-import { useReOrderPlaylist } from "@/app/quires/usePlaylist.ts";
 import { useLibraryStore } from "@/app/store/usePlaylistState.ts";
 import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
+import { useReOrderPlaylist } from "@/app/api/quires/usePlaylist.ts";
 import { SortableItem } from "@/app/components/dnd/SortableItem.tsx";
 import { PlayListTrackItem } from "@/pages/musicLibrary/PlayListTrackItem.tsx";
-import { useGetMusicLibrary, useDeleteTrackFromLibrary } from "@/app/quires/useLibrary.ts";
 import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAudioTracks.ts";
+import { useGetMusicLibrary, useDeleteTrackFromLibrary } from "@/app/api/quires/useLibrary.ts";
 import { mapToPlayList, mapToPlayListItem, savePlayListToStorage } from "@/app/utils/playlistUtils.ts";
 
 
