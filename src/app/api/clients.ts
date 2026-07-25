@@ -15,7 +15,7 @@ export const streamServiceClient = axios.create({
 })
 
 export const internetSearcherClient = axios.create({
-  baseURL: getInternetSearcherBaseURL() + "/internet-searcher",
+  baseURL: getInternetSearcherBaseURL(),
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 })
