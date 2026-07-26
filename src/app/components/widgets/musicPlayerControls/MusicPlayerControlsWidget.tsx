@@ -74,54 +74,63 @@ export const MusicPlayerControlsWidget = () => {
   if (!state.isControlsExpanded) {
 
     return <Box id="controls-unexpanded">
-        <ListItem disablePadding sx={{
-          maxWidth: "lg",
-          margin: "0 auto",
+      <ListItem disablePadding sx={{
+        padding: {
+          lg: "0 4px"
+        },
+        maxWidth: "lg",
+        margin: "0 auto",
+      }}>
+        <ListItemButton sx={{
+          borderRadius: 0,
+          borderTop: `${topBorderColor} solid 1px`,
+          borderBottom: `${topBorderColor} solid 1px`,
+          borderLeft: {
+            lg: `${topBorderColor} solid 1px`,
+          },
+          borderRight: {
+            lg: `${topBorderColor} solid 1px`,
+          },
+          paddingLeft: {
+            xs: "4px",
+            md: "1.1rem",
+          },
+          display: "flex",
+          gap: 1,
+          minWidth: 0, // Важно для сжатия
         }}>
-          <ListItemButton sx={{
-            borderRadius: 0,
-            borderTop: `${topBorderColor} solid 1px`,
-            borderBottom: `${topBorderColor} solid 1px`,
-            paddingLeft: {
-              xs: "4px",
-              md: "1.1rem",
-            },
-            display: "flex",
-            gap: 1,
-            minWidth: 0, // Важно для сжатия
+          <Box sx={{
+            flex: "1 1 auto",
+            minWidth: 0,
+            overflow: "hidden",
+            justifyContent: "space-between",
+
+          }} onClick={handleExpandedClick}>
+            <TextRunner speed={8}>
+              <ListItemText primary={state.currentTrack?.title ?? "-"}
+                            sx={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                            }} />
+            </TextRunner>
+          </Box>
+          <Stack spacing={1} direction={"row"} sx={{
+            flex: "0 0 auto",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0, // Запрещаем сжатие
           }}>
-            <Box sx={{
-              flex: "1 1 auto",
-              minWidth: 0,
-              overflow: "hidden",
-              justifyContent: "space-between",
+            <SkipPreviousRoundedIcon sx={unExpandedControls} onClick={handleClickPrev}
+                                     onDoubleClick={handleDoubleClickPrev} />
+            {state.isPlaying
+              ? <PauseIcon sx={unExpandedControls} onClick={() => state.pause()} />
+              : <PlayArrowIcon sx={unExpandedControls} onClick={() => state.play()} />}
 
-            }} onClick={handleExpandedClick}>
-              <TextRunner speed={8}>
-                <ListItemText primary={state.currentTrack?.title ?? "-"}
-                              sx={{
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                              }} />
-              </TextRunner>
-            </Box>
-            <Stack spacing={1} direction={"row"} sx={{
-              flex: "0 0 auto",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0, // Запрещаем сжатие
-            }}>
-              <SkipPreviousRoundedIcon sx={unExpandedControls} onClick={handleClickPrev}
-                                       onDoubleClick={handleDoubleClickPrev} />
-              {state.isPlaying
-                ? <PauseIcon sx={unExpandedControls} onClick={() => state.pause()} />
-                : <PlayArrowIcon sx={unExpandedControls} onClick={() => state.play()} />}
+            <SkipNextRoundedIcon sx={unExpandedControls} onClick={onNextHandler} />
+          </Stack>
 
-              <SkipNextRoundedIcon sx={unExpandedControls} onClick={onNextHandler} />
-            </Stack>
-
-          </ListItemButton>
-        </ListItem>
+        </ListItemButton>
+      </ListItem>
     </Box>;
   }
 
@@ -133,99 +142,106 @@ export const MusicPlayerControlsWidget = () => {
          sx={{
            borderTop: `${topBorderColor} solid 1px`,
            borderBottom: `${topBorderColor} solid 1px`,
+           // borderLeft: `${topBorderColor} solid 1px`,
+           // borderRight: `${topBorderColor} solid 1px`,
            backgroundColor: "#222222",
-           // flexShrink: 0,
-           margin: "0 auto",
-           maxWidth: "1200px",
            width: "100%",
          }}>
-      <Box onClick={handleExpandedClick} sx={{
-        cursor: "pointer",
-        "&:hover .MuiButton-root": {
-          backgroundColor: "action.active",
-        },
+      <Box sx={{
+        margin: "0 auto",
+        maxWidth: "1200px",
       }}>
-        <Button
-          id="expand"
-          size="medium"
-          sx={{ width: "1rem",
-            backgroundColor: topBorderColor,
-            mb: 2, borderRadius: 0.3 }}>
-        </Button>
-      </Box>
-      <Stack spacing={0.2}>
-
-        <Box sx={{
-          display: "flex", justifyContent: "space-between", mt: 2, gap: 2, alignItems: "center",
-          width: "100%",
-          padding: {
-            md: "0 5rem",
-            xs: "0 2.5rem",
-          },
-
-        }}>
-
-          <TextRunner align="center">
-            <Typography id="trackRoadText" variant="inherit">
-              {state.currentTrack?.title ?? "-"}
-            </Typography>
-          </TextRunner>
-
-        </Box>
-        <AudioProgress
-          currentTime={currentTime}
-          duration={duration}
-          onChangeProgress={onChangeProgress}
-        />
-        <Box sx={{
-          display: "flex", justifyContent: "space-between", mt: 2, gap: 2, alignItems: "center",
-          width: "100%",
-          padding: {
-            md: "0 5rem",
-            xs: "0 2.5rem",
+        <Box onClick={handleExpandedClick} sx={{
+          cursor: "pointer",
+          "&:hover .MuiButton-root": {
+            backgroundColor: "action.active",
+            // margin: "0 auto",
           },
         }}>
-          <Typography variant="caption">
-            {formatTime(currentTime)}
-          </Typography>
-          <Typography variant="caption">
-            {trackPosition ?? "-"}
-          </Typography>
-          <Typography variant="caption">
-            {formatTime(timeLeft)}
-          </Typography>
+          <Button
+            id="expand"
+            size="medium"
+            sx={{
+              width: "1rem",
+              backgroundColor: topBorderColor,
+              mb: 2, borderRadius: 0.3,
+            }}>
+          </Button>
         </Box>
+        <Stack spacing={0.2}>
 
-        <Stack direction={"row"} sx={{
-          alignItems: "center",
-          justifyContent: "space-around",
-        }}>
-          <Box sx={{ cursor: "pointer" }} onClick={handleRepeatClick}>
-            <RepeatIcon color={state.repeatType !== RepeatType.NONE ? activeColor : disabledColor}
-                        single={state.repeatType === RepeatType.SINGLE} />
-          </Box>
-          <Stack spacing={2} direction={"row"} sx={{
-            alignItems: "center",
-            justifyContent: "center",
+          <Box sx={{
+            display: "flex", justifyContent: "space-between", mt: 2, gap: 2, alignItems: "center",
+            width: "100%",
+            padding: {
+              md: "0 5rem",
+              xs: "0 2.5rem",
+            },
+
           }}>
-            <SkipPreviousRoundedIcon sx={sxIconsArrow} onClick={handleClickPrev}
-                                     onDoubleClick={handleDoubleClickPrev} />
-            {state.isPlaying
-              ? <PauseIcon sx={sxIconsPlayPause} onClick={() => state.pause()} />
-              : <PlayArrowIcon sx={sxIconsPlayPause} onClick={() => state.play()} />}
 
-            <SkipNextRoundedIcon sx={sxIconsArrow} onClick={onNextHandler} />
-          </Stack>
-          <ShuffleRoundedIcon
-            cursor={"pointer"}
-            color={state.isShuffle ? "action" : "disabled"}
-            fontSize="large"
-            onClick={handleShuffleClick}
+            <TextRunner align="center">
+              <Typography id="trackRoadText" variant="inherit">
+                {state.currentTrack?.title ?? "-"}
+              </Typography>
+            </TextRunner>
+
+          </Box>
+          <AudioProgress
+            currentTime={currentTime}
+            duration={duration}
+            onChangeProgress={onChangeProgress}
           />
-        </Stack>
+          <Box sx={{
+            display: "flex", justifyContent: "space-between", mt: 2, gap: 2, alignItems: "center",
+            width: "100%",
+            padding: {
+              md: "0 5rem",
+              xs: "0 2.5rem",
+            },
+          }}>
+            <Typography variant="caption">
+              {formatTime(currentTime)}
+            </Typography>
+            <Typography variant="caption">
+              {trackPosition ?? "-"}
+            </Typography>
+            <Typography variant="caption">
+              {formatTime(timeLeft)}
+            </Typography>
+          </Box>
 
-        <VolumeControl />
-      </Stack>
+          <Stack direction={"row"} sx={{
+            alignItems: "center",
+            justifyContent: "space-around",
+          }}>
+            <Box sx={{ cursor: "pointer" }} onClick={handleRepeatClick}>
+              <RepeatIcon color={state.repeatType !== RepeatType.NONE ? activeColor : disabledColor}
+                          single={state.repeatType === RepeatType.SINGLE} />
+            </Box>
+            <Stack spacing={2} direction={"row"} sx={{
+              alignItems: "center",
+              justifyContent: "center",
+            }}>
+              <SkipPreviousRoundedIcon sx={sxIconsArrow} onClick={handleClickPrev}
+                                       onDoubleClick={handleDoubleClickPrev} />
+              {state.isPlaying
+                ? <PauseIcon sx={sxIconsPlayPause} onClick={() => state.pause()} />
+                : <PlayArrowIcon sx={sxIconsPlayPause} onClick={() => state.play()} />}
+
+              <SkipNextRoundedIcon sx={sxIconsArrow} onClick={onNextHandler} />
+            </Stack>
+            <ShuffleRoundedIcon
+              cursor={"pointer"}
+              color={state.isShuffle ? "action" : "disabled"}
+              fontSize="large"
+              onClick={handleShuffleClick}
+            />
+          </Stack>
+
+          <VolumeControl />
+        </Stack>
+      </Box>
     </Box>
   );
 };

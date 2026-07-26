@@ -4,6 +4,7 @@ name: stream-service
 
 services:
   frontend:
+    image: stream-service-frontend:0.0.1a
     build:
       context: ..
       dockerfile: .stream-service-docker/Dockerfile
