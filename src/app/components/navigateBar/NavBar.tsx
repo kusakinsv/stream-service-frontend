@@ -15,7 +15,7 @@ export interface NavItem {
 }
 
 const libraryIcon = <LibraryMusicIcon fontSize="large"/>
-const searchIcon = <ManageSearchIcon sx={{fontSize: "2.8rem"}}/>
+const searchIcon = <ManageSearchIcon sx={{fontSize: "2.7rem"}}/>
 
 
 export const navItems: NavItem[] = [

@@ -12,6 +12,7 @@ export const ContentStyled = styled(Container)(() => ({
 "&.MuiContainer-maxWidthLg": {
   paddingLeft: "0.2rem",
   paddingRight: "0.2rem",
+  paddingBottom: 0,
   overflow: 'auto',
   // скрываем скролл
   scrollbarWidth: 'none', // Firefox
