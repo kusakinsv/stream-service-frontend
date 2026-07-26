@@ -43,6 +43,7 @@ export const theme = createTheme({
     // Текст
     text: {
       disabled: '#6d6f78',   // неактивный текст
+      // primary: getColors().white.main,    // основной белый текст
       primary: getColors().white.main,    // основной белый текст
       secondary: getColors().grey.textSecondary// второстепенный текст (сероватый)
     },

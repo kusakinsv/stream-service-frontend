@@ -22,7 +22,7 @@ export const PlaylistTrackItem = (
 
   const formattedDuration = item.duration ? formatDuration(item.duration) : "--:--";
 
-  const sxInvalid = { color: "grey"};
+  const sxInvalid = { color: "grey", whiteSpace: 'nowrap'};
 
   return (
     <Box sx={{
@@ -45,23 +45,17 @@ export const PlaylistTrackItem = (
           <CircleButton disabled={!item.isValid} onClick={onClick}>
             {(currentTrackUrl === item.url && isPlaying) ? <PauseIcon /> : <PlayArrowIcon />}
           </CircleButton>
-          <Stack spacing={2} direction="row" sx={{
-            justifyContent: "space-between",
-          }}>
             <Box sx={!item.isValid ? sxInvalid : {}}>
               {item.isValid ?
                 (<TextRunner speed={8}>
                   {item.title}
                 </TextRunner>)
-                : (item.title)}
-
-
+                : item.title}
             </Box>
-            <Box sx={!item.isValid ? sxInvalid : {}}>
-              {formattedDuration}
-            </Box>
-          </Stack>
         </Stack>
+        <Box sx={!item.isValid ? sxInvalid : {color: "text.secondary"}}>
+          {formattedDuration}
+        </Box>
         <IconButton onClick={() => onDeleteClick(item)}>
           <DeleteForeverIcon fontSize="large" sx={{
             color: "grey.500",

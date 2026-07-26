@@ -14,7 +14,7 @@ export const getColors = () => {
       light: '#8a85fe',      // более светлый оттенок для hover/активных состояний
     },
     white: {
-      main: "#FFF",
+      main: "#f1f1f1",
       secondary: "#ECEDEE",
       opacity: {
         5: "#FFFFFF0D",
