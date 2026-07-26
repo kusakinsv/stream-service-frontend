@@ -29,6 +29,9 @@ export const SearchTrackItem = (
       margin: "0 0 0.4rem 0",
       padding: "0.3rem 1rem 0.3rem 1rem",
       backgroundColor: getColors().grey.panelsDark,
+      "&:hover": {
+        backgroundColor: getColors().grey.panelsMain,
+      },
     }}>
       <Stack spacing={2} direction="row" sx={{
         alignItems: "center",
