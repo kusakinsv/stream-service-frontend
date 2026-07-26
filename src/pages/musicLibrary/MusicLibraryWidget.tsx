@@ -22,7 +22,7 @@ import { useLibraryStore } from "@/app/store/usePlaylistState.ts";
 import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
 import { useReOrderPlaylist } from "@/app/api/quires/usePlaylist.ts";
 import { SortableItem } from "@/app/components/dnd/SortableItem.tsx";
-import { PlayListTrackItem } from "@/pages/musicLibrary/PlayListTrackItem.tsx";
+import { PlaylistTrackItem } from "@/pages/musicLibrary/PlaylistTrackItem.tsx";
 import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAudioTracks.ts";
 import { useGetMusicLibrary, useDeleteTrackFromLibrary } from "@/app/api/quires/useLibrary.ts";
 import { mapToPlayList, mapToPlayListItem, savePlayListToStorage } from "@/app/utils/playlistUtils.ts";
@@ -104,7 +104,7 @@ export const MusicLibraryWidget = () => {
           <SortableItem
             key={value.url}
             item={{ id: value.url }}
-            elem={<PlayListTrackItem
+            elem={<PlaylistTrackItem
               item={value}
               isPlaying={isPlaying}
               currentTrackUrl={currentTrack?.url}
@@ -120,6 +120,8 @@ export const MusicLibraryWidget = () => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
+        delay: 500,
+        tolerance: 7,
         distance: 5,
       },
     }),
@@ -148,7 +150,8 @@ export const MusicLibraryWidget = () => {
 
               <List sx={{
                 maxWidth: 'lg',
-                margin: "0 auto"
+                margin: "0 auto",
+                paddingBottom: "0",
               }}>
                 {itemElements()}
               </List>

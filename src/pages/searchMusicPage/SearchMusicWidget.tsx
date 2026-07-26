@@ -10,9 +10,9 @@ import { useSearchStore } from "@/app/store/useMusicSearchtState.ts";
 import { useAddTrackToLibrary } from "@/app/api/quires/useLibrary.ts";
 import { SearchPanel } from "@/pages/searchMusicPage/SearchPanel.tsx";
 import { useSearchMusicTracks } from "@/app/api/quires/useSearchMusicTracks.ts";
-import { TrackItem } from "@/pages/searchMusicPage/components/trackItem/TrackItem.tsx";
 import { mapToPlayListItem, updatePlayListInStorage } from "@/app/utils/playlistUtils.ts";
 import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAudioTracks.ts";
+import { SearchTrackItem } from "@/pages/searchMusicPage/components/trackItem/SearchTrackItem.tsx";
 
 
 export const SearchMusicWidget = () => {
@@ -65,7 +65,7 @@ export const SearchMusicWidget = () => {
       // .filter(item => item.isValid)
       .map((item) => {
         return (
-          <TrackItem
+          <SearchTrackItem
             item={item as AudioTrackData}
             isPlaying={isPlaying}
             currentTrackUrl={currentTrack?.url}

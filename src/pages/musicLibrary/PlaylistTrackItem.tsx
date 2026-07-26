@@ -1,33 +1,34 @@
 import PauseIcon from "@mui/icons-material/Pause";
-import AddBoxIcon from "@mui/icons-material/AddBox";
 import { Box, Stack, IconButton } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 import type { AudioTrackData } from "@/app/types.ts";
 
 import { getColors } from "@/app/theme/colors.ts";
+import { TextRunner } from "@/app/components/TextRunner/TextRunner.tsx";
 import { CircleButton } from "@/app/components/button/ItemButton/CircleButton.ts";
 
 interface ITrackItemProps {
   item: AudioTrackData;
   isPlaying: boolean;
   currentTrackUrl: string | undefined;
-  onPlayClick?: () => void;
-  onAddClick: (item: AudioTrackData) => void;
+  onClick?: () => void;
+  onDeleteClick: (item: AudioTrackData) => void;
 }
 
-export const TrackItem = (
-  { item, isPlaying, currentTrackUrl, onPlayClick, onAddClick }: ITrackItemProps) => {
+export const PlaylistTrackItem = (
+  { item, isPlaying, currentTrackUrl, onClick, onDeleteClick }: ITrackItemProps) => {
 
   const formattedDuration = item.duration ? formatDuration(item.duration) : "--:--";
 
-  const sxInvalid = { color: "grey" };
+  const sxInvalid = { color: "grey"};
 
   return (
     <Box sx={{
       borderRadius: "4px",
-      margin: "0.15rem 0 0.15rem 0",
-      padding: "0.5rem 1rem 0.5rem 1rem",
+      margin: "0 0 0.4rem 0",
+      padding: "0.3rem 1rem 0.3rem 1rem",
       backgroundColor: getColors().grey.panelsDark,
     }}>
       <Stack spacing={2} direction="row" sx={{
@@ -35,28 +36,38 @@ export const TrackItem = (
         justifyContent: "space-between",
       }}>
         <Stack spacing={2} direction="row" sx={{
+          flex: "1 1 auto",
+          minWidth: 0,
+          overflow: "hidden",
           alignItems: "center",
           justifyContent: "flex-start",
         }}>
-          <CircleButton disabled={!item.isValid} onClick={onPlayClick}>
+          <CircleButton disabled={!item.isValid} onClick={onClick}>
             {(currentTrackUrl === item.url && isPlaying) ? <PauseIcon /> : <PlayArrowIcon />}
           </CircleButton>
           <Stack spacing={2} direction="row" sx={{
             justifyContent: "space-between",
           }}>
             <Box sx={!item.isValid ? sxInvalid : {}}>
-              {item.title}
+              {item.isValid ?
+                (<TextRunner speed={8}>
+                  {item.title}
+                </TextRunner>)
+                : (item.title)}
+
+
             </Box>
             <Box sx={!item.isValid ? sxInvalid : {}}>
               {formattedDuration}
             </Box>
           </Stack>
         </Stack>
-        <IconButton onClick={() => onAddClick(item)}>
-          <AddBoxIcon fontSize={"large"} sx={{
+        <IconButton onClick={() => onDeleteClick(item)}>
+          <DeleteForeverIcon fontSize="large" sx={{
             color: "grey.500",
             "&:hover": {
-              color: getColors().blue.main,
+              // backgroundColor: "red",
+              color: getColors().red.error,
             },
           }} />
         </IconButton>

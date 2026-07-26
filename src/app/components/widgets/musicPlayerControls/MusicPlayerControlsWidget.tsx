@@ -4,7 +4,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ShuffleRoundedIcon from "@mui/icons-material/ShuffleRounded";
 import SkipNextRoundedIcon from "@mui/icons-material/SkipNextRounded";
 import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
-import { Box, Stack, Button, useTheme, ListItem, Typography, ListItemText, ListItemButton } from "@mui/material";
+import { Box, Stack, Button, ListItem, useTheme, Typography, ListItemText, ListItemButton } from "@mui/material";
 
 import { formatTime } from "@/app/utils/utils.ts";
 import { RepeatIcon } from "@/app/components/icons/RepeatIcon.tsx";
@@ -33,6 +33,7 @@ export const MusicPlayerControlsWidget = () => {
   const theme = useTheme();
   const activeColor = theme.palette.action.active;
   const disabledColor = theme.palette.action.disabled;
+  const topBorderColor = "#3e3e3e";
 
   const onNextHandler = () => {
     state.next();
@@ -73,61 +74,66 @@ export const MusicPlayerControlsWidget = () => {
   if (!state.isControlsExpanded) {
 
     return <Box id="controls-unexpanded">
-      <ListItem disablePadding sx={{
-        maxWidth: "lg",
-        margin: "0 auto",
-      }}>
-        <ListItemButton sx={{
-          paddingLeft: {
-            xs: "4px",
-            md: "1.1rem"
-          },
-          margin: "0 3.2px",
-          display: "flex",
-          gap: 1,
-          minWidth: 0, // Важно для сжатия
+        <ListItem disablePadding sx={{
+          maxWidth: "lg",
+          margin: "0 auto",
         }}>
-          <Box sx={{
-            flex: "1 1 auto",
-            minWidth: 0,
-            overflow: "hidden",
-            justifyContent: "space-between",
-
-          }} onClick={handleExpandedClick}>
-            <TextRunner speed={8}>
-              <ListItemText primary={state.currentTrack?.title ?? "-"}
-                            sx={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                            }}/>
-            </TextRunner>
-          </Box>
-          <Stack spacing={1} direction={"row"} sx={{
-            flex: "0 0 auto",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0, // Запрещаем сжатие
+          <ListItemButton sx={{
+            borderRadius: 0,
+            borderTop: `${topBorderColor} solid 1px`,
+            borderBottom: `${topBorderColor} solid 1px`,
+            paddingLeft: {
+              xs: "4px",
+              md: "1.1rem",
+            },
+            margin: "0 3.2px",
+            display: "flex",
+            gap: 1,
+            minWidth: 0, // Важно для сжатия
           }}>
-            <SkipPreviousRoundedIcon sx={unExpandedControls} onClick={handleClickPrev}
-                                     onDoubleClick={handleDoubleClickPrev} />
-            {state.isPlaying
-              ? <PauseIcon sx={unExpandedControls} onClick={() => state.pause()} />
-              : <PlayArrowIcon sx={unExpandedControls} onClick={() => state.play()} />}
+            <Box sx={{
+              flex: "1 1 auto",
+              minWidth: 0,
+              overflow: "hidden",
+              justifyContent: "space-between",
 
-            <SkipNextRoundedIcon sx={unExpandedControls} onClick={onNextHandler} />
-          </Stack>
+            }} onClick={handleExpandedClick}>
+              <TextRunner speed={8}>
+                <ListItemText primary={state.currentTrack?.title ?? "-"}
+                              sx={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                              }} />
+              </TextRunner>
+            </Box>
+            <Stack spacing={1} direction={"row"} sx={{
+              flex: "0 0 auto",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0, // Запрещаем сжатие
+            }}>
+              <SkipPreviousRoundedIcon sx={unExpandedControls} onClick={handleClickPrev}
+                                       onDoubleClick={handleDoubleClickPrev} />
+              {state.isPlaying
+                ? <PauseIcon sx={unExpandedControls} onClick={() => state.pause()} />
+                : <PlayArrowIcon sx={unExpandedControls} onClick={() => state.play()} />}
 
-        </ListItemButton>
-      </ListItem>
+              <SkipNextRoundedIcon sx={unExpandedControls} onClick={onNextHandler} />
+            </Stack>
+
+          </ListItemButton>
+        </ListItem>
     </Box>;
   }
 
   const currentTime = state.currentTime;
   const duration = state.duration;
-  const timeLeft = duration-currentTime
+  const timeLeft = duration - currentTime;
   return (
     <Box id="controls-expanded"
          sx={{
+           borderTop: `${topBorderColor} solid 1px`,
+           borderBottom: `${topBorderColor} solid 1px`,
            backgroundColor: "#222222",
            // flexShrink: 0,
            margin: "0 auto",
@@ -137,46 +143,59 @@ export const MusicPlayerControlsWidget = () => {
       <Box onClick={handleExpandedClick} sx={{
         cursor: "pointer",
         "&:hover .MuiButton-root": {
-          backgroundColor: "secondary.light",
+          backgroundColor: "action.active",
         },
       }}>
         <Button
           id="expand"
           size="medium"
-          sx={{ width: "1rem", backgroundColor: "grey", mb: 2, borderRadius: 0.3}}>
+          sx={{ width: "1rem",
+            backgroundColor: topBorderColor,
+            mb: 2, borderRadius: 0.3 }}>
         </Button>
       </Box>
       <Stack spacing={0.2}>
 
-          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 , gap: 2, alignItems: "center",
-            width: "100%",
-            padding: {
+        <Box sx={{
+          display: "flex", justifyContent: "space-between", mt: 2, gap: 2, alignItems: "center",
+          width: "100%",
+          padding: {
             md: "0 5rem",
             xs: "0 2.5rem",
           },
 
-          }}>
-            <Typography variant="caption">
-              {formatTime(currentTime)}
+        }}>
+
+          <TextRunner align="center">
+            <Typography id="trackRoadText" variant="inherit">
+              {state.currentTrack?.title ?? "-"}
             </Typography>
-            <TextRunner align="center">
-              <Typography id="trackRoadText" variant="inherit">
-                {state.currentTrack?.title ?? "-"}
-              </Typography>
-            </TextRunner>
-            <Typography variant="caption">
-              {formatTime(timeLeft)}
-            </Typography>
-          </Box>
+          </TextRunner>
+
+        </Box>
         <AudioProgress
           currentTime={currentTime}
           duration={duration}
           onChangeProgress={onChangeProgress}
         />
-
-        <Typography variant="caption">
-          {trackPosition ?? "-"}
-        </Typography>
+        <Box sx={{
+          display: "flex", justifyContent: "space-between", mt: 2, gap: 2, alignItems: "center",
+          width: "100%",
+          padding: {
+            md: "0 5rem",
+            xs: "0 2.5rem",
+          },
+        }}>
+          <Typography variant="caption">
+            {formatTime(currentTime)}
+          </Typography>
+          <Typography variant="caption">
+            {trackPosition ?? "-"}
+          </Typography>
+          <Typography variant="caption">
+            {formatTime(timeLeft)}
+          </Typography>
+        </Box>
 
         <Stack direction={"row"} sx={{
           alignItems: "center",

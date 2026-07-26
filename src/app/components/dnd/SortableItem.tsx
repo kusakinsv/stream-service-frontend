@@ -34,7 +34,7 @@ export const SortableItem = ({ item, elem}: SortableItemProps<unknown>) => {
       style={style}
       elevation={isDragging ? 4 : 1}
       sx={{
-        mb: 1,
+        mb: 0.5,
         "&:hover": {
           backgroundColor: getColors().grey.light,
         },

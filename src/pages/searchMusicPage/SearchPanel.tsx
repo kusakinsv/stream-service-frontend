@@ -1,5 +1,6 @@
 import SearchIcon from "@mui/icons-material/Search";
 import { Stack, Button, TextField, InputAdornment } from "@mui/material";
+import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 
 import { getColors } from "@/app/theme/colors.ts";
 import { useSearchStore } from "@/app/store/useMusicSearchtState.ts";
@@ -16,6 +17,18 @@ export const SearchPanel = ({onSearch}: SearchPanelProps) => {
     onSearch(currentSearchTrack);
   };
 
+  const handlePressEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      onSearch(currentSearchTrack);
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(currentSearchTrack);
+  };
+
   // console.log(currentSearchTrack);
   const handleChangeTextField = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentSearchTrack(event.target.value);
@@ -23,12 +36,14 @@ export const SearchPanel = ({onSearch}: SearchPanelProps) => {
 
   return (
     <SearchPanelStyled>
-      <Stack spacing={2} direction="row" sx={{ display: "flex", justifyContent: "space-around" }}>
+      <Stack spacing={1} direction="row" sx={{ display: "flex",}}>
         <TextField
+          onKeyDown={handlePressEnter}
           value={currentSearchTrack}
           onChange={handleChangeTextField} fullWidth={true}
+          onSubmit={handleSubmit}
           sx={{
-            maxWidth: "90%",
+            maxWidth: "94%",
             margin: "0 auto",
           }}
           slotProps={{
@@ -40,7 +55,11 @@ export const SearchPanel = ({onSearch}: SearchPanelProps) => {
               ),
             },
           }} />
-        <Button onClick={handleSearchClick}>GO</Button>
+        <Button onClick={handleSearchClick} sx={{
+          width: "6%"
+        }} >
+          <KeyboardDoubleArrowRightIcon fontSize="large"/>
+        </Button>
       </Stack>
     </SearchPanelStyled>
   );

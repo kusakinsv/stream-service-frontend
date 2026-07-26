@@ -4,6 +4,7 @@ export const getColors = () => {
       panelsMain: "#3a3d41",
       background: "#222222",
       panelsDark: "#2b2d31",
+      panelsDark2: "#222222",
       textSecondary: "#b5bac1",
       light: "#cfd6dc"
     },
@@ -24,6 +25,9 @@ export const getColors = () => {
         10: "#FFFFFF1A",
         80: "#FFFFFFCC",
       },
+    },
+    border: {
+      main: "#FFFFFF33"
     },
     red: {
       main: "#E33F2A",
