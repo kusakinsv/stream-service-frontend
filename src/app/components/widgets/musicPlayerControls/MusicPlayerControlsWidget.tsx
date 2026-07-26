@@ -86,7 +86,6 @@ export const MusicPlayerControlsWidget = () => {
               xs: "4px",
               md: "1.1rem",
             },
-            margin: "0 3.2px",
             display: "flex",
             gap: 1,
             minWidth: 0, // Важно для сжатия
