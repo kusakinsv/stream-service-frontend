@@ -9,9 +9,9 @@ import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
 import { useSearchStore } from "@/app/store/useMusicSearchtState.ts";
 import { useAddTrackToLibrary } from "@/app/api/quires/useLibrary.ts";
 import { SearchPanel } from "@/pages/searchMusicPage/SearchPanel.tsx";
+import { useValidateAudioTracks } from "@/app/hooks/useValidateAudioTracks.ts";
 import { useSearchMusicTracks } from "@/app/api/quires/useSearchMusicTracks.ts";
 import { mapToPlayListItem, updatePlayListInStorage } from "@/app/utils/playlistUtils.ts";
-import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAudioTracks.ts";
 import { SearchTrackItem } from "@/pages/searchMusicPage/components/trackItem/SearchTrackItem.tsx";
 
 

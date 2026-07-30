@@ -28,12 +28,46 @@ const unExpandedControls = {
   cursor: "pointer",
 };
 
+const topBorderColor = "#353535";
+
 export const MusicPlayerControlsWidget = () => {
+
   const state = useAudioStore();
+
+  // const { updatePositionState, setPlaybackState } = useMediaSession({
+  //   title: state.currentTrack?.title,
+  //   artwork: [
+  //     { src: '/cover-512x512.png', sizes: '512x512', type: 'image/png' },
+  //     { src: '/cover-192x192.png', sizes: '192x192', type: 'image/png' },
+  //   ],
+  //   onPlay: () => {
+  //     state.play();
+  //     setPlaybackState('playing');
+  //   },
+  //   onPause: () => {
+  //     state.pause();
+  //     setPlaybackState('paused');
+  //   },
+  //   onNext: () => {
+  //     // Логика переключения на следующий трек
+  //     console.log('Next track');
+  //   },
+  //   onPrev: () => {
+  //     // Логика переключения на предыдущий трек
+  //     console.log('Prev track');
+  //   },
+  //   onSeek: (time) => {
+  //     console.log(time);
+  //     // if (audioRef.current) {
+  //     //   audioRef.current.currentTime = time;
+  //     // }
+  //   },
+  // })
+
   const theme = useTheme();
   const activeColor = theme.palette.action.active;
   const disabledColor = theme.palette.action.disabled;
-  const topBorderColor = "#3e3e3e";
+
 
   const onNextHandler = () => {
     state.next();
@@ -62,6 +96,7 @@ export const MusicPlayerControlsWidget = () => {
 
   const onChangeProgress = (value: number) => {
     state.progressTo(value);
+    // updatePositionState(state.duration, 1)
   };
 
   const handleExpandedClick = () => {
@@ -70,6 +105,43 @@ export const MusicPlayerControlsWidget = () => {
 
   const currentPosition = state.getCurrentPlaylist().findIndex(track => track === state.currentTrack);
   const trackPosition = `${currentPosition + 1} / ${state.getCurrentPlaylist().length}`;
+
+  // useEffect(() => {
+  //   const audio = state.currentTrack?.audioElem;
+  //   if (!audio) return;
+  //
+  //   const updatePosition = () => {
+  //     if (audio.duration && !isNaN(audio.duration)) {
+  //       // updatePositionState(audio.duration, audio.currentTime);
+  //     }
+  //   };
+  //
+  //   // 🔥 Критично: вызываем ОДИН РАЗ, когда аудио загрузилось (ещё ДО нажатия Play)
+  //   const handleLoadedMetadata = () => {
+  //     if (audio.duration && !isNaN(audio.duration)) {
+  //       updatePositionState(audio.duration, 0);
+  //       console.log('Duration set for iOS:', audio.duration);
+  //     }
+  //   };
+  //
+  //   audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+  //
+  //   // Если метаданные уже загружены — вызываем сразу
+  //   if (audio.readyState >= 1) {
+  //     handleLoadedMetadata();
+  //   }
+  //
+  //   // Обновляем во время игры
+  //   const interval = setInterval(updatePosition, 1000);
+  //   audio.addEventListener('timeupdate', updatePosition);
+  //
+  //   return () => {
+  //     clearInterval(interval);
+  //     audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+  //     audio.removeEventListener('timeupdate', updatePosition);
+  //   };
+  // }, [updatePositionState]);
+
 
   if (!state.isControlsExpanded) {
 
@@ -97,7 +169,7 @@ export const MusicPlayerControlsWidget = () => {
           },
           display: "flex",
           gap: 1,
-          minWidth: 0, // Важно для сжатия
+          minWidth: 0,
         }}>
           <Box sx={{
             flex: "1 1 auto",
@@ -118,7 +190,7 @@ export const MusicPlayerControlsWidget = () => {
             flex: "0 0 auto",
             alignItems: "center",
             justifyContent: "center",
-            flexShrink: 0, // Запрещаем сжатие
+            flexShrink: 0,
           }}>
             <SkipPreviousRoundedIcon sx={unExpandedControls} onClick={handleClickPrev}
                                      onDoubleClick={handleDoubleClickPrev} />
@@ -245,3 +317,4 @@ export const MusicPlayerControlsWidget = () => {
     </Box>
   );
 };
+

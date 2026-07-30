@@ -23,7 +23,7 @@ import { useAudioStore } from "@/app/store/useAudioPlayerState.ts";
 import { useReOrderPlaylist } from "@/app/api/quires/usePlaylist.ts";
 import { SortableItem } from "@/app/components/dnd/SortableItem.tsx";
 import { PlaylistTrackItem } from "@/pages/musicLibrary/PlaylistTrackItem.tsx";
-import { useValidateAudioTracks } from "@/app/hooks/audioValidator/useValidateAudioTracks.ts";
+import { useValidateAudioTracks } from "@/app/hooks/useValidateAudioTracks.ts";
 import { useGetMusicLibrary, useDeleteTrackFromLibrary } from "@/app/api/quires/useLibrary.ts";
 import { mapToPlayList, mapToPlayListItem, savePlayListToStorage } from "@/app/utils/playlistUtils.ts";
 
@@ -52,7 +52,7 @@ export const MusicLibraryWidget = () => {
   };
 
   const onItemPlayButtonClickHandler = (item: AudioTrackData, trackList: AudioTrackData[]) => {
-    if (currentTrack?.url !== item.url) {
+    if (currentTrack?.url !== item.url && item) {
       setCurrentTrack(item, trackList);
     } else {
       togglePlay();
@@ -95,6 +95,10 @@ export const MusicLibraryWidget = () => {
   useEffect(() => {
     if (currentTrack === null && getCurrentPlaylist().length === 0) setCurrentPlaylist(libraryItems);
   }, [libraryItems, setCurrentPlaylist]);
+
+  // useEffect(() => {
+  //   setCurrentTrack(libraryItems[0], libraryItems)
+  // }, [])
 
   const itemElements = () => {
     return libraryItems

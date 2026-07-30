@@ -6,6 +6,14 @@ import type { AudioTrackData } from "@/app/types.ts";
 import { shufflePlaylist } from "@/app/utils/utils.ts";
 
 
+// const initMetadata = new MediaMetadata({
+//   title: "Без названия",
+//   artist: "Неизвестный исполнитель",
+//   artwork: [
+//     { src: "/favicon.ico", sizes: "96x96", type: "image/x-icon" },
+//   ],
+// });
+
 export enum RepeatType {
   NONE,
   PLAYLIST,
@@ -32,6 +40,8 @@ interface AudioPlayerState {
   next: () => void;
   prev: () => void;
   togglePlay: () => void;
+  //mediaSession
+  updateMetadata: (track: AudioTrackData, playlist: AudioTrackData[]) => void;
 
   handleTrackEnd: () => void;
   progressTo: (time: number) => void;
@@ -65,13 +75,29 @@ export const useAudioStore = create<AudioPlayerState>()(
 
 
     setCurrentTrack: (track, ofPlaylist) => {
-      const { currentTrack, audioRef: currentRef, progressTo, setCurrentPlaylist } = get();
+      const { currentTrack, audioRef: currentRef, progressTo, setCurrentPlaylist, updateMetadata, play, pause, next, prev} = get();
+
+      const eventListenerControlsFunc = () => {
+        navigator.mediaSession.setActionHandler("play", play);
+        navigator.mediaSession.setActionHandler("pause", pause);
+        navigator.mediaSession.setActionHandler("previoustrack", prev);
+        navigator.mediaSession.setActionHandler("nexttrack", next);
+        navigator.mediaSession.setActionHandler("seekto", next);
+
+      }
 
       // если уже играет трек, то ставим ему паузу и сбрасываем прогресс
       if (currentTrack !== track && currentRef) {
         currentRef.pause();
         progressTo(0);
       }
+
+
+      currentTrack?.audioElem?.removeEventListener("playing", eventListenerControlsFunc);
+
+      track.audioElem?.addEventListener("playing", eventListenerControlsFunc);
+      updateMetadata(track, ofPlaylist);
+
 
       set({
         error: null,
@@ -110,6 +136,7 @@ export const useAudioStore = create<AudioPlayerState>()(
       if (audioRef) {
         audioRef.play();
         set({ isPlaying: true });
+        navigator.mediaSession.playbackState = 'playing'
       }
     },
 
@@ -118,6 +145,7 @@ export const useAudioStore = create<AudioPlayerState>()(
       if (audioRef) {
         audioRef.pause();
         set({ isPlaying: false });
+        navigator.mediaSession.playbackState = 'paused'
       }
     },
 
@@ -147,7 +175,15 @@ export const useAudioStore = create<AudioPlayerState>()(
       const { audioRef } = get();
       if (audioRef) {
         set({ currentTime: audioRef.currentTime });
+        if ("mediaSession" in navigator && audioRef.duration && !isNaN(audioRef.duration)) {
+          navigator.mediaSession.setPositionState({
+            duration: audioRef.duration,
+            playbackRate: audioRef.playbackRate,
+            position: audioRef.currentTime,
+          });
+        }
       }
+
     },
 
     setVolume: (volume) => {
@@ -230,11 +266,11 @@ export const useAudioStore = create<AudioPlayerState>()(
     },
 
     prev: () => {
-      const { getCurrentPlaylist, currentTrack, setCurrentTrack, repeatType , prev} = get();
+      const { getCurrentPlaylist, currentTrack, setCurrentTrack, repeatType, prev } = get();
       if (currentTrack) {
         const currentIndex = getCurrentPlaylist().indexOf(currentTrack);
         if (currentIndex !== 0) {
-        const prevTrack = getCurrentPlaylist()[currentIndex - 1]
+          const prevTrack = getCurrentPlaylist()[currentIndex - 1];
           setCurrentTrack(prevTrack, getCurrentPlaylist());
           if (!prevTrack.isValid) {
             if (currentIndex !== 0) {
@@ -243,7 +279,7 @@ export const useAudioStore = create<AudioPlayerState>()(
           }
         } else {
           if (repeatType === RepeatType.PLAYLIST) {
-            setCurrentTrack(getCurrentPlaylist()[getCurrentPlaylist().length-1], getCurrentPlaylist());
+            setCurrentTrack(getCurrentPlaylist()[getCurrentPlaylist().length - 1], getCurrentPlaylist());
           }
         }
       }
@@ -300,11 +336,24 @@ export const useAudioStore = create<AudioPlayerState>()(
     },
 
     toggleControlsExpanded: () => {
-      const {isControlsExpanded} = get();
+      const { isControlsExpanded } = get();
       set({
         isControlsExpanded: !isControlsExpanded,
       });
     },
 
+    updateMetadata: (track: AudioTrackData, playlist: AudioTrackData[]) => {
+      const currentIndex = playlist.indexOf(track);
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.title,
+        album: `${currentIndex+1} / ${playlist.length}`,
+        artwork: [
+          { src: "/favicon.ico", sizes: "96x96", type: "image/x-icon" },
+        ],
+      });
+
+    },
+
   })),
 );
+
