@@ -5,15 +5,6 @@ import type { AudioTrackData } from "@/app/types.ts";
 
 import { shufflePlaylist } from "@/app/utils/utils.ts";
 
-
-// const initMetadata = new MediaMetadata({
-//   title: "Без названия",
-//   artist: "Неизвестный исполнитель",
-//   artwork: [
-//     { src: "/favicon.ico", sizes: "96x96", type: "image/x-icon" },
-//   ],
-// });
-
 export enum RepeatType {
   NONE,
   PLAYLIST,
@@ -41,7 +32,7 @@ interface AudioPlayerState {
   prev: () => void;
   togglePlay: () => void;
   //mediaSession
-  updateMetadata: (track: AudioTrackData, playlist: AudioTrackData[]) => void;
+  updateMetadata: (track: AudioTrackData, playlist: AudioTrackData[], playlistName: null | string) => void;
 
   handleTrackEnd: () => void;
   progressTo: (time: number) => void;
@@ -75,18 +66,39 @@ export const useAudioStore = create<AudioPlayerState>()(
 
 
     setCurrentTrack: (track, ofPlaylist) => {
-      const { currentTrack, audioRef: currentRef, progressTo, setCurrentPlaylist, updateMetadata, play, pause, next, prev} = get();
+      const {
+        currentTrack,
+        audioRef: currentRef,
+        progressTo,
+        setCurrentPlaylist,
+        updateMetadata,
+        play,
+        pause,
+        next,
+        prev,
+        volume,
+      } = get();
 
+
+      const newAudioRef = track.audioElem;
+
+      const updateProgress = (seekTime: number | undefined, track: AudioTrackData) => {
+        if (seekTime !== undefined && track?.duration !== undefined) {
+          const progress = seekTime * 100 / currentDuration;
+          progressTo(progress);
+        }
+      };
+
+      const currentDuration = track.duration ?? 0;
       const eventListenerControlsFunc = () => {
         navigator.mediaSession.setActionHandler("play", play);
         navigator.mediaSession.setActionHandler("pause", pause);
         navigator.mediaSession.setActionHandler("previoustrack", prev);
         navigator.mediaSession.setActionHandler("nexttrack", next);
-        navigator.mediaSession.setActionHandler("seekto", next);
+        navigator.mediaSession.setActionHandler("seekto", (details) => updateProgress(details.seekTime, track));
+      };
 
-      }
-
-      // если уже играет трек, то ставим ему паузу и сбрасываем прогресс
+      //если уже играет трек, то ставим ему паузу и сбрасываем прогресс
       if (currentTrack !== track && currentRef) {
         currentRef.pause();
         progressTo(0);
@@ -95,8 +107,10 @@ export const useAudioStore = create<AudioPlayerState>()(
 
       currentTrack?.audioElem?.removeEventListener("playing", eventListenerControlsFunc);
 
+      updateMetadata(track, ofPlaylist, null);
+
       track.audioElem?.addEventListener("playing", eventListenerControlsFunc);
-      updateMetadata(track, ofPlaylist);
+
 
 
       set({
@@ -106,28 +120,32 @@ export const useAudioStore = create<AudioPlayerState>()(
         currentTrack: track,
         audioRef: track.audioElem,
         duration: track.duration ?? 0,
-        // currentPlaylist: ofPlaylist,
       });
       setCurrentPlaylist(ofPlaylist);
 
-      const { audioRef, volume } = get();
-      if (audioRef) {
-        audioRef.volume = volume / 100;
-        audioRef.onended = () => {
+
+      if (newAudioRef) {
+        newAudioRef.volume = volume / 100;
+        newAudioRef.onended = () => {
           get().handleTrackEnd();
         };
-        audioRef.ontimeupdate = () => {
-          set({ currentTime: audioRef.currentTime });
+        newAudioRef.ontimeupdate = () => {
+          set({ currentTime: newAudioRef.currentTime });
         };
 
-        audioRef.play().catch((error) => {
-          console.error("Ошибка воспроизведения", error);
-          set({
-            isPlaying: false,
-            error: "Ошибка воспроизведения",
+        newAudioRef.play()
+          .then(() => {
+            navigator.mediaSession.playbackState = "playing";
+            set({ isPlaying: true });
+
+          })
+          .catch((error) => {
+            console.error("Ошибка воспроизведения", error);
+            set({
+              isPlaying: false,
+              error: "Ошибка воспроизведения",
+            });
           });
-        });
-        set({ isPlaying: true });
       }
     },
 
@@ -136,7 +154,7 @@ export const useAudioStore = create<AudioPlayerState>()(
       if (audioRef) {
         audioRef.play();
         set({ isPlaying: true });
-        navigator.mediaSession.playbackState = 'playing'
+        navigator.mediaSession.playbackState = "playing";
       }
     },
 
@@ -145,7 +163,7 @@ export const useAudioStore = create<AudioPlayerState>()(
       if (audioRef) {
         audioRef.pause();
         set({ isPlaying: false });
-        navigator.mediaSession.playbackState = 'paused'
+        navigator.mediaSession.playbackState = "paused";
       }
     },
 
@@ -167,6 +185,7 @@ export const useAudioStore = create<AudioPlayerState>()(
         const progressToValue = progressEnd * time;
         // console.log(duration + " " + progressToValue);
         audioRef.currentTime = progressToValue;
+        console.log(progressToValue);
         set({ currentTime: progressToValue });
       }
     },
@@ -252,10 +271,8 @@ export const useAudioStore = create<AudioPlayerState>()(
         if (currentIndex + 1 < getCurrentPlaylist().length) {
           const nextTrack = getCurrentPlaylist()[currentIndex + 1];
           setCurrentTrack(nextTrack, getCurrentPlaylist());
-          if (!nextTrack.isValid) {
-            if (currentIndex + 1 < getCurrentPlaylist().length) {
-              next();
-            }
+          if (!nextTrack.isValid && currentIndex + 1 < getCurrentPlaylist().length) {
+            next();
           }
         } else {
           if (repeatType === RepeatType.PLAYLIST) {
@@ -272,10 +289,8 @@ export const useAudioStore = create<AudioPlayerState>()(
         if (currentIndex !== 0) {
           const prevTrack = getCurrentPlaylist()[currentIndex - 1];
           setCurrentTrack(prevTrack, getCurrentPlaylist());
-          if (!prevTrack.isValid) {
-            if (currentIndex !== 0) {
-              prev();
-            }
+          if (!prevTrack.isValid && currentIndex !== 0) {
+            prev();
           }
         } else {
           if (repeatType === RepeatType.PLAYLIST) {
@@ -342,18 +357,15 @@ export const useAudioStore = create<AudioPlayerState>()(
       });
     },
 
-    updateMetadata: (track: AudioTrackData, playlist: AudioTrackData[]) => {
+    updateMetadata: (track: AudioTrackData, playlist: AudioTrackData[], playlistName: null | string) => {
       const currentIndex = playlist.indexOf(track);
       navigator.mediaSession.metadata = new MediaMetadata({
         title: track.title,
-        album: `${currentIndex+1} / ${playlist.length}`,
+        album: `${currentIndex + 1} / ${playlist.length} ${playlistName && playlistName}`,
         artwork: [
           { src: "/favicon.ico", sizes: "96x96", type: "image/x-icon" },
         ],
       });
-
     },
-
   })),
 );
-

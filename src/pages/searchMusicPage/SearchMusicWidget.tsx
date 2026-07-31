@@ -47,6 +47,7 @@ export const SearchMusicWidget = () => {
 
   const onItemPlayButtonClickHandler = (item: AudioTrackData, trackList: AudioTrackData[]) => {
     if (currentTrack?.url !== item.url) {
+
       setCurrentTrack(item, trackList);
     } else {
       togglePlay();

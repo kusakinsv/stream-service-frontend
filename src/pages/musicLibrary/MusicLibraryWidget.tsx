@@ -32,8 +32,6 @@ export const MusicLibraryWidget = () => {
   const { deleteTrack, libraryItems, setLibraryItems } = useLibraryStore();
   const { isPlaying, currentTrack, setCurrentTrack, togglePlay, setCurrentPlaylist, isShuffle, getCurrentPlaylist} = useAudioStore();
 
-  // const [localLibrary, setLocalLibrary] = useState(libraryItems);
-
   const { data, isLoading } = useGetMusicLibrary({});
   const { mutate: deleteItem , data: afterDeleting} = useDeleteTrackFromLibrary();
   const { mutate: reOrderPlaylist, data: reordered } = useReOrderPlaylist();
@@ -83,11 +81,15 @@ export const MusicLibraryWidget = () => {
   //для добавления
   useEffect(() => {
     if (validatedItems.length >= libraryItems.length) {
-        if (libraryItems.length === 0)  setLibraryItems(validatedItems);
+        if (libraryItems.length === 0) {
+          setLibraryItems(validatedItems);
+          setCurrentPlaylist(validatedItems);
+        }
         else {
           const updatesMap = new Map(validatedItems.map(item => [item.url, item]))
           const newLibraryItems = libraryItems.map<AudioTrackData>(item => updatesMap.has(item.url) ? (updatesMap.get(item.url) ?? item) : item);
           setLibraryItems(newLibraryItems);
+          setCurrentPlaylist(newLibraryItems);
         }
     }
   }, [validatedItems]);
