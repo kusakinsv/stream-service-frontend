@@ -361,7 +361,7 @@ export const useAudioStore = create<AudioPlayerState>()(
       const currentIndex = playlist.indexOf(track);
       navigator.mediaSession.metadata = new MediaMetadata({
         title: track.title,
-        album: `${currentIndex + 1} / ${playlist.length} ${playlistName && playlistName}`,
+        album: `${currentIndex + 1} / ${playlist.length} ${playlistName !== null ? playlistName : ""}`,
         artwork: [
           { src: "/favicon.ico", sizes: "96x96", type: "image/x-icon" },
         ],
